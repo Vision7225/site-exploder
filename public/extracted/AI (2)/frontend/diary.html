@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI-EEG Mental Wellness - Home</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+:root{
+    --bg:#f4f8fb;
+    --text:#1e293b;
+    --card:#ffffff;
+    --primary:#2563eb;
+    --secondary:#06b6d4;
+}
+
+*{
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    transition:0.4s ease;
+}
+
+/* NAVBAR */
+.navbar{
+    height:60px;
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+    transition:0.4s;
+}
+
+/* Right Navbar */
+.nav-right{
+    display:flex;
+    align-items:center;
+    gap:20px;
+}
+
+.help-icon{
+    cursor:pointer;
+    font-size:18px;
+}
+
+.profile{
+    position:relative;
+    cursor:pointer;
+}
+
+.dropdown{
+    position:absolute;
+    top:50px;
+    right:0;
+    background:white;
+    width:180px;
+    border-radius:10px;
+    box-shadow:0 10px 25px rgba(0,0,0,0.15);
+    display:none;
+}
+
+/* MOOD SELECTOR */
+.mood-selector{
+    padding:10px 20px;
+}
+
+.mood-selector button{
+    border:none;
+    background:var(--card);
+    margin-right:8px;
+    padding:6px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.mood-selector button:hover{
+    transform:scale(1.1);
+}
+
+/* MAIN */
+.main{
+    display:flex;
+    min-height:calc(100vh - 60px);
+}
+
+/* ================= SIDEBAR ================= */
+.sidebar{
+width:240px;
+background:var(--card);
+padding-top:20px;
+box-shadow:4px 0 15px rgba(0,0,0,0.05);
+}
+
+.sidebar a{
+display:block;
+padding:12px 20px;
+text-decoration:none;
+color:var(--text);
+transition:0.3s;
+margin:5px 10px;
+border-radius:8px;
+}
+
+.sidebar a:hover{
+background:rgba(0,0,0,0.05);
+}
+
+/* ACTIVE PAGE */
+.sidebar a.active{
+background:linear-gradient(120deg,var(--primary),var(--secondary));
+color:white;
+font-weight:600;
+}
+
+/* CONTENT */
+.content{
+    flex:1;
+    padding:30px;
+}
+
+/* HERO */
+.hero{
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+    padding:50px;
+    border-radius:18px;
+    margin-bottom:40px;
+    transition:0.4s;
+}
+/* ================= CARD ================= */
+.card{
+background:var(--card);
+padding:30px;
+border-radius:18px;
+box-shadow:0 10px 30px rgba(0,0,0,0.08);
+margin-bottom:30px;
+}
+
+h2{margin-top:0;}
+
+/* ================= MOOD ================= */
+.mood button{
+width:45px;
+height:45px;
+border-radius:50%;
+border:none;
+margin-right:8px;
+font-size:20px;
+cursor:pointer;
+background:#f1f5f9;
+transition:0.3s;
+}
+
+.mood button.active{
+background:linear-gradient(120deg,var(--primary),var(--secondary));
+color:white;
+}
+
+/* ================= TEXTAREA ================= */
+textarea{
+width:100%;
+height:120px;
+border-radius:12px;
+padding:12px;
+border:1px solid #ddd;
+resize:none;
+outline:none;
+}
+
+.counter{
+text-align:right;
+font-size:12px;
+color:#64748b;
+margin-top:5px;
+}
+
+/* ================= BUTTONS ================= */
+button.save{
+padding:8px 18px;
+border:none;
+border-radius:20px;
+background:linear-gradient(120deg,var(--primary),var(--secondary));
+color:white;
+cursor:pointer;
+margin-right:8px;
+}
+
+button.secret{
+background:var(--danger);
+}
+
+/* ================= CALENDAR ================= */
+.calendar-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:15px;
+}
+
+#calendar{
+display:grid;
+grid-template-columns:repeat(7,1fr);
+gap:8px;
+}
+
+.day{
+background:#f8fafc;
+padding:12px;
+border-radius:12px;
+text-align:center;
+cursor:pointer;
+transition:0.3s;
+}
+
+.day:hover{
+transform:scale(1.05);
+}
+
+.day.today{
+border:2px solid var(--primary);
+}
+
+.green{color:var(--success);}
+.red{color:var(--danger);}
+
+/* ================= ENTRY ================= */
+.entry{
+background:#f8fafc;
+padding:15px;
+border-radius:12px;
+margin-top:10px;
+position:relative;
+}
+
+.delete{
+position:absolute;
+right:10px;
+top:8px;
+color:red;
+cursor:pointer;
+}
+
+footer{
+background:var(--primary);
+color:white;
+text-align:center;
+padding:12px;
+margin-top:40px;
+}
+
+@media(max-width:900px){
+.sidebar{display:none;}
+}
+
+
+</style>
+</head>
+
+<body id="diary">
+
+<!-- NAVBAR -->
+<div class="navbar">
+<div><i class="fa-solid fa-brain"></i> AI-EEG Wellness</div>
+<div>Diary Module</div>
+</div>
+
+<div class="main">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+<a href="home.html"><i class="fa-solid fa-house"></i> Home</a>
+<a href="dashboard.html"><i class="fa-solid fa-chart-line"></i> Dashboard</a>
+<a href="upload.html"><i class="fa-solid fa-upload"></i> Upload Media</a>
+<a href="diary.html" class="active"><i class="fa-solid fa-book"></i> Diary</a>
+<a href="chatbot.html"><i class="fa-solid fa-robot"></i> Chatbot</a>
+<a href="weekly.html"><i class="fa-solid fa-calendar-week"></i> Weekly Report</a>
+<a href="#"><i class="fa-solid fa-user-doctor"></i> Doctor Support</a>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+<!-- HERO -->
+<div class="hero">
+<h1>Daily Emotional Reflection 📖</h1>
+<p>Track your thoughts, emotions, and mental progress.</p>
+</div>
+
+<!-- ENTRY CARD -->
+<div class="card">
+<h2>✨ Write Today’s Reflection</h2>
+
+<div class="mood">
+<button onclick="setMood(this,'😊')">😊</button>
+<button onclick="setMood(this,'😐')">😐</button>
+<button onclick="setMood(this,'😞')">😞</button>
+<button onclick="setMood(this,'😡')">😡</button>
+</div>
+
+<textarea id="diaryText" placeholder="Write your thoughts..."></textarea>
+<div class="counter" id="counter">0 characters</div>
+<br>
+<button class="save" onclick="saveEntry()">Save Entry</button>
+</div>
+
+<!-- CALENDAR -->
+<div class="card">
+<h2>📅 Monthly Tracker</h2>
+
+<div class="calendar-header">
+<button onclick="changeMonth(-1)">◀</button>
+<div id="monthYear"></div>
+<button onclick="changeMonth(1)">▶</button>
+</div>
+
+<div id="calendar"></div>
+<br>
+🔥 Streak: <span id="streak">0</span> days<br>
+📊 Monthly Progress: <span id="progress">0%</span>
+</div>
+
+<!-- ENTRIES -->
+<div class="card">
+<h2>🕒 Previous Entries</h2>
+<div id="entries"></div>
+</div>
+
+</div>
+</div>
+
+<footer>
+© 2025 AI-Driven Mental Wellness Platform
+</footer>
+
+<script>
+
+/* ===== Mood Selection ===== */
+let selectedMood="😐";
+const textarea=document.getElementById("diaryText");
+const counter=document.getElementById("counter");
+
+textarea.addEventListener("input",()=>{
+counter.innerText=textarea.value.length+" characters";
+});
+
+function setMood(btn,mood){
+selectedMood=mood;
+document.querySelectorAll(".mood button").forEach(b=>b.classList.remove("active"));
+btn.classList.add("active");
+}
+
+/* ===== Save Entry ===== */
+function saveEntry(){
+let text=textarea.value;
+if(!text){alert("Write something first.");return;}
+let entries=JSON.parse(localStorage.getItem("diaryEntries"))||[];
+entries.push({mood:selectedMood,text:text,date:new Date().toISOString()});
+localStorage.setItem("diaryEntries",JSON.stringify(entries));
+textarea.value="";
+counter.innerText="0 characters";
+loadEntries();
+generateCalendar();
+updateStats();
+}
+
+/* ===== Load Entries ===== */
+function loadEntries(){
+let entries=JSON.parse(localStorage.getItem("diaryEntries"))||[];
+let container=document.getElementById("entries");
+container.innerHTML="";
+entries.slice().reverse().forEach((e,i)=>{
+container.innerHTML+=`
+<div class="entry">
+<small>${new Date(e.date).toDateString()} | ${e.mood}</small>
+<p>${e.text}</p>
+<span class="delete" onclick="deleteEntry(${entries.length-1-i})">✖</span>
+</div>`;
+});
+}
+
+function deleteEntry(index){
+let entries=JSON.parse(localStorage.getItem("diaryEntries"))||[];
+entries.splice(index,1);
+localStorage.setItem("diaryEntries",JSON.stringify(entries));
+loadEntries();
+generateCalendar();
+updateStats();
+}
+
+/* ===== Calendar ===== */
+let currentDate=new Date();
+
+function generateCalendar(){
+let cal=document.getElementById("calendar");
+cal.innerHTML="";
+let year=currentDate.getFullYear();
+let month=currentDate.getMonth();
+document.getElementById("monthYear").innerText=
+currentDate.toLocaleString("default",{month:"long"})+" "+year;
+
+let days=new Date(year,month+1,0).getDate();
+let entries=JSON.parse(localStorage.getItem("diaryEntries"))||[];
+let dates=entries.map(e=>new Date(e.date).toDateString());
+
+for(let i=1;i<=days;i++){
+let d=new Date(year,month,i);
+let div=document.createElement("div");
+div.classList.add("day");
+if(d.toDateString()===new Date().toDateString())div.classList.add("today");
+let has=dates.includes(d.toDateString());
+div.innerHTML=`${i}<br><span class="${has?'green':'red'}">${has?'✔':'✖'}</span>`;
+cal.appendChild(div);
+}
+}
+
+function changeMonth(val){
+currentDate.setMonth(currentDate.getMonth()+val);
+generateCalendar();
+}
+
+/* ===== Stats ===== */
+function updateStats(){
+let entries=JSON.parse(localStorage.getItem("diaryEntries"))||[];
+let unique=[...new Set(entries.map(e=>new Date(e.date).toDateString()))];
+document.getElementById("streak").innerText=unique.length;
+document.getElementById("progress").innerText=Math.round((unique.length/30)*100)+"%";
+}
+
+/* Init */
+generateCalendar();
+loadEntries();
+updateStats();
+
+</script>
+
+</body>
+</html>

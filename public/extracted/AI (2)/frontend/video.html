@@ -1,0 +1,440 @@
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>AI-EEG Wellness - Video Emotion Analysis</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+        <style>
+            :root {
+                --bg: #f4f8fb;
+                --text: #1e293b;
+                --card: #ffffff;
+                --primary: #2563eb;
+                --primary-rgb: 37, 99, 235;
+                --secondary: #1e3a8a;
+                --accent: #22c55e;
+                --sidebar-width: 260px;
+                --success: #22c55e;
+                --danger: #ef4444;
+                --warning: #f59e0b;
+                
+                /* --- CONSTANT BUTTON COLORS --- */
+                --btn-analyze-clr: #2563eb;
+                --btn-mic-clr: #ef4444;
+                --btn-upload-clr: #0ea5e9;
+                --btn-reset-clr: #64748b;
+                --btn-diary-clr: #8b5cf6;
+            }
+
+            body.dark {
+                --bg: #0f172a;
+                --text: #e2e8f0;
+                --card: #1e293b;
+            }
+
+            * { box-sizing: border-box; font-family: 'Segoe UI', sans-serif; transition: background 0.3s, color 0.3s; }
+            body { margin: 0; background: var(--bg); color: var(--text); overflow-x: hidden; }
+
+            /* --- HEADER --- */
+            .top-header {
+                height: 65px; background: var(--card); display: flex; align-items: center;
+                justify-content: space-between; padding: 0 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+                position: fixed; top: 0; width: 100%; z-index: 1100;
+            }
+            .logo { font-size: 22px; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 10px; }
+            .top-menu { display: flex; align-items: center; gap: 25px; }
+            .top-menu a { text-decoration: none; color: var(--text); font-weight: 500; font-size: 14px; }
+
+            /* --- MOOD SELECTOR --- */
+            .mood-selector {
+                position: fixed; top: 65px; left: var(--sidebar-width); right: 0;
+                display: flex; gap: 10px; z-index: 1000; background: var(--card);
+                padding: 15px 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+                border-bottom: 1px solid rgba(0,0,0,0.05);
+            }
+            .mood-selector button {
+                border: none; padding: 10px 18px; border-radius: 20px; cursor: pointer;
+                background: var(--bg); color: var(--text); font-weight: 600;
+            }
+            .mood-selector button.active { background: var(--primary); color: white; box-shadow: 0 4px 12px rgba(var(--primary-rgb), 0.4); }
+
+            /* --- UPDATED SIDEBAR (Matching Text Analysis Theme) --- */
+            .sidebar {
+                width: var(--sidebar-width); 
+                height: calc(100vh - 65px); 
+                background: var(--card);
+                position: fixed; 
+                top: 65px; 
+                left: 0; 
+                padding: 10px 0 50px 0;
+                border-right: 1px solid rgba(0,0,0,0.05); 
+                z-index: 1050; 
+                overflow-y: auto;
+                /* Scrollbar styling saathi */
+                scrollbar-width: thin;
+                scrollbar-color: var(--primary) var(--bg);
+            }
+
+            /* Custom Scrollbar for Chrome/Safari */
+            .sidebar::-webkit-scrollbar { width: 6px; }
+            .sidebar::-webkit-scrollbar-track { background: var(--bg); }
+            .sidebar::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+
+            .sidebar h3 { 
+                padding: 20px 25px 10px; 
+                font-size: 11px; 
+                text-transform: uppercase; 
+                opacity: 0.5; 
+                letter-spacing: 1.5px; 
+            }
+
+            .sidebar a {
+                display: flex; 
+                align-items: center; 
+                gap: 15px; 
+                padding: 12px 25px;
+                text-decoration: none; 
+                color: var(--text); 
+                transition: all 0.3s ease; 
+                font-size: 14px;
+                font-weight: 500;
+                border-right: 4px solid transparent;
+            }
+
+            .sidebar a:hover, .sidebar a.active { 
+                background: rgba(var(--primary-rgb), 0.1); 
+                color: var(--primary); 
+                border-right: 4px solid var(--primary); 
+            }
+
+            .sidebar a i { width: 20px; text-align: center; }
+
+            /* --- MAIN CONTENT --- */
+            .main-content { margin-left: var(--sidebar-width); padding: 150px 30px 30px 30px; position: relative; z-index: 5; }
+
+            .hero {
+                background: linear-gradient(135deg, var(--secondary), var(--primary));
+                color: white; padding: 35px; border-radius: 20px; margin-bottom: 25px;
+                box-shadow: 0 10px 30px rgba(var(--primary-rgb), 0.2);
+            }
+
+            .input-card, .activity-card {
+                background: var(--card); padding: 30px; border-radius: 20px;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 25px;
+                text-align: center;
+            }
+
+            #videoPreview { 
+                width: 100%; max-width: 500px; border-radius: 15px; 
+                background: #000; margin: 0 auto 20px; display: block;
+                border: 4px solid var(--primary); transform: scaleX(-1);
+                box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            }
+
+            /* --- RESULTS --- */
+            .result-dashboard { 
+                display: none; margin-top: 30px; padding: 25px; background: var(--card); border-radius: 20px;
+                box-shadow: 0 15px 35px rgba(0,0,0,0.1); border-top: 5px solid var(--primary);
+                animation: fadeInUp 0.5s ease-out; text-align: left;
+            }
+            @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+
+            .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; margin-top: 20px; }
+            .metric-box { background: var(--bg); padding: 15px; border-radius: 12px; }
+            .progress-container { height: 10px; background: #e2e8f0; border-radius: 10px; margin-top: 8px; overflow: hidden; }
+            .progress-bar { height: 100%; width: 0%; transition: 1.5s cubic-bezier(0.17, 0.67, 0.83, 0.67); }
+
+            .insight-box { 
+                background: rgba(var(--primary-rgb), 0.05); border: 1px dashed var(--primary); 
+                padding: 20px; border-radius: 15px;
+            }
+
+            .tag { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+
+            /* --- ACTION BUTTONS --- */
+            .action-buttons { display: flex; justify-content: center; gap: 10px; flex-wrap: wrap; }
+            .btn {
+                border: none; padding: 12px 20px; border-radius: 12px; 
+                font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; transition: 0.3s;
+                color: white;
+            }
+            .btn-analyze { background: var(--btn-analyze-clr) !important; }
+            .btn-mic { background: var(--btn-mic-clr) !important; }
+            .btn-upload { background: var(--btn-upload-clr) !important; }
+            .btn-reset { background: var(--btn-reset-clr) !important; }
+            .btn-diary { background: var(--btn-diary-clr) !important; }
+
+            /* --- TABLE --- */
+            table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+            th { text-align: left; padding: 12px; border-bottom: 2px solid var(--bg); font-size: 14px; opacity: 0.6; }
+            td { padding: 12px; border-bottom: 1px solid var(--bg); font-size: 14px; text-align: left;}
+            .status-pill { padding: 4px 10px; border-radius: 10px; font-size: 12px; font-weight: bold; }
+
+            #toast {
+                position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+                background: #1e293b; color: white; padding: 12px 25px; border-radius: 30px;
+                display: none; z-index: 2000;
+            }
+
+            #emojiContainer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 1; overflow: hidden; }
+            .mood-emoji { position: absolute; font-size: 60px; opacity: 0.15; }
+            @keyframes floatAnim { 0% { transform: translateY(0); } 100% { transform: translateY(-100px); } }
+        </style>
+    </head>
+    <body>
+
+    <div id="emojiContainer"></div>
+
+    <header class="top-header">
+        <div class="logo"><i class="fa-solid fa-brain"></i> AI-EEG Wellness</div>
+        <div class="top-menu">
+            <a href="home.html">Home</a>
+            <a href="dashboard.html">Dashboard</a>
+            <a href="about.html">About us</a>
+            <a href="contact.html">Contact us</a>
+            <button onclick="toggleDarkMode()" style="background:none; border:none; cursor:pointer; font-size: 20px;">🌓</button>
+            <div style="background: var(--primary); color: white; width: 35px; height: 35px; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-user"></i></div>
+        </div>
+    </header>
+
+    <div class="mood-selector">
+        <span style="align-self: center; font-weight: bold; margin-right: 10px;">Mood Check-in:</span>
+        <button data-mood="calm" onclick="setMood('calm', true)">😌 Calm</button>
+        <button data-mood="happy" onclick="setMood('happy', true)">😊 Happy</button>
+        <button data-mood="neutral" onclick="setMood('neutral', true)">😐 Neutral</button>
+        <button data-mood="sad" onclick="setMood('sad', true)">😞 Sad</button>
+        <button data-mood="angry" onclick="setMood('angry', true)">😡 Angry</button>
+    </div>
+
+    <nav class="sidebar">
+        <h3>AI Analysis Tools</h3>
+        <a href="eeg.html"><i class="fa-solid fa-brain"></i> EEG Live Scan</a>
+        <a href="image.html"><i class="fa-solid fa-image"></i> Image Analysis</a>
+        <a href="audio.html"><i class="fa-solid fa-microphone"></i> Audio Analysis</a>
+        <a href="video.html" class="active"><i class="fa-solid fa-video"></i> Emotion Video</a>
+        <a href="text.html"><i class="fa-solid fa-file-lines"></i> Text Analysis</a>
+        
+        <h3>Wellness & Solutions</h3>
+        <a href="breathing.html"><i class="fa-solid fa-wind"></i> Breathing Exercise</a>
+        <a href="meditation.html"><i class="fa-solid fa-music"></i> Meditation Music</a>
+        <a href="diary.html"><i class="fa-solid fa-book"></i> AI Diary</a>
+        <a href="sleep.html"><i class="fa-solid fa-bed"></i> Sleep Tracker</a>
+
+        <h3>Support System</h3>
+        <a href="alerts.html"><i class="fa-solid fa-bell"></i> Smart Alerts</a>
+        <a href="doctor.html"><i class="fa-solid fa-user-doctor"></i> Doctor Support</a>
+        <a href="settings.html"><i class="fa-solid fa-gear"></i> Settings</a>
+    </nav>
+
+    <main class="main-content">
+        <section class="hero" id="heroBox">
+            <h1 id="heroTitle" style="margin:0; font-size: 42px;">Video Analysis Engine</h1>
+            <p id="heroMessage" style="opacity: 0.9; margin-top: 10px; font-size: 18px;">Detect real-time emotions using facial micro-expression AI.</p>
+        </section>
+
+        <div class="input-card">
+            <video id="videoPreview" autoplay muted playsinline></video>
+
+            <div class="result-dashboard" id="resultDashboard">
+                <h3 style="margin-top: 0;"><i class="fa-solid fa-chart-pie"></i> Visual Expression Results</h3>
+                <div class="result-grid">
+                    <div>
+                        <div class="metric-box">
+                            <div style="display: flex; justify-content: space-between; font-size: 14px;"><span>Engagement</span> <b id="engVal">0%</b></div>
+                            <div class="progress-container"><div class="progress-bar" id="engBar" style="background: var(--success);"></div></div>
+                        </div>
+                        <div class="metric-box" style="margin-top:10px;">
+                            <div style="display: flex; justify-content: space-between; font-size: 14px;"><span>Stress Level</span> <b id="strsVal">0%</b></div>
+                            <div class="progress-container"><div class="progress-bar" id="strsBar" style="background: var(--danger);"></div></div>
+                        </div>
+                    </div>
+                    <div class="insight-box">
+                        <span class="tag" id="statusTag" style="background: var(--primary); color: white;">Ready</span>
+                        <p id="aiAdvice" style="font-size: 14px; line-height: 1.6; margin: 0; opacity: 0.9;">
+                            Start recording or upload a video to see facial micro-expression analysis.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="action-buttons" style="margin-top: 20px;">
+                <button class="btn btn-mic" id="recordBtn" onclick="toggleRecording()"><i class="fa-solid fa-circle"></i> Start Recording</button>
+                <button class="btn btn-upload" onclick="document.getElementById('vidUpload').click()"><i class="fa-solid fa-file-arrow-up"></i> Upload</button>
+                <input type="file" id="vidUpload" style="display:none;" accept="video/*" onchange="loadVideo(event)">
+                <button class="btn btn-analyze" onclick="performAnalysis()"><i class="fa-solid fa-wand-magic-sparkles"></i> Analyze Video</button>
+                <button class="btn btn-reset" onclick="resetForm()"><i class="fa-solid fa-rotate-right"></i> Reset</button>
+                <button class="btn btn-diary" onclick="saveToHistory()"><i class="fa-solid fa-heart-pulse"></i> Save Results</button>
+            </div>
+        </div>
+
+        <div class="activity-card">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="margin:0;"><i class="fa-solid fa-clock-rotate-left"></i> Recent Activity</h3>
+                <button onclick="clearActivity()" style="background:none; border:none; color:var(--danger); cursor:pointer; font-size: 12px;">Clear All</button>
+            </div>
+            <div style="overflow-x: auto;">
+                <table id="activityTable">
+                    <thead>
+                        <tr>
+                            <th>Date & Time</th>
+                            <th>Type</th>
+                            <th>Analysis</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody id="activityBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast">Analysis saved successfully! ✨</div>
+
+    <script>
+        // JS Logic same as before, no changes needed here.
+        const moods = {
+            calm: { col: '#0ea5e9', rgb: '14, 165, 233', sec: '#0284c7', t: "Calm Mind", m: "Analyzing video with a focused perspective.", e: "😌" },
+            happy: { col: '#22c55e', rgb: '34, 197, 94', sec: '#16a34a', t: "High Energy", m: "Positive expressions detected! Keep that smile glowing.", e: "😊" },
+            neutral: { col: '#64748b', rgb: '100, 116, 139', sec: '#475569', t: "Balanced State", m: "Maintaining steady observation for emotional clarity.", e: "😐" },
+            sad: { col: '#6366f1', rgb: '99, 102, 241', sec: '#4f46e5', t: "Deep Reflection", m: "It's okay to feel. AI is here to help you understand.", e: "😞" },
+            angry: { col: '#ef4444', rgb: '239, 68, 68', sec: '#dc2626', t: "Release Stress", m: "Identifying stress triggers through facial tension.", e: "😡" }
+        };
+
+        let mediaRecorder;
+        let recordedChunks = [];
+        let stream;
+        let isRecording = false;
+
+        function setMood(type, save = true) {
+            const root = document.documentElement;
+            const container = document.getElementById("emojiContainer");
+            const choice = moods[type] || moods.neutral;
+
+            root.style.setProperty('--primary', choice.col);
+            root.style.setProperty('--primary-rgb', choice.rgb);
+            root.style.setProperty('--secondary', choice.sec);
+            
+            document.getElementById("heroTitle").innerText = choice.t;
+            document.getElementById("heroMessage").innerText = choice.m;
+
+            document.querySelectorAll(".mood-selector button").forEach(b => b.classList.remove("active"));
+            const activeBtn = document.querySelector(`.mood-selector button[data-mood="${type}"]`);
+            if(activeBtn) activeBtn.classList.add("active");
+
+            if (save) localStorage.setItem('selectedMood', type);
+
+            container.innerHTML = "";
+            for(let i=0; i<12; i++) {
+                let span = document.createElement("span");
+                span.className = "mood-emoji";
+                span.innerText = choice.e;
+                span.style.left = Math.random() * 95 + "%";
+                span.style.top = (Math.random() * 70 + 10) + "%";
+                span.style.animation = `floatAnim ${4+Math.random()*3}s infinite alternate ease-in-out`;
+                container.appendChild(span);
+            }
+        }
+
+        async function initCamera() {
+            try {
+                stream = await navigator.mediaDevices.getUserMedia({ video: true, audio: false });
+                document.getElementById('videoPreview').srcObject = stream;
+            } catch (err) { console.log("Camera access denied."); }
+        }
+
+        function toggleRecording() {
+            const btn = document.getElementById('recordBtn');
+            if (!isRecording) {
+                recordedChunks = [];
+                mediaRecorder = new MediaRecorder(stream);
+                mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) recordedChunks.push(e.data); };
+                mediaRecorder.onstop = () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                    const video = document.getElementById('videoPreview');
+                    video.srcObject = null;
+                    video.src = URL.createObjectURL(blob);
+                    video.controls = true;
+                    video.style.transform = "none";
+                };
+                mediaRecorder.start();
+                isRecording = true;
+                btn.innerHTML = '<i class="fa-solid fa-stop"></i> Stop Recording';
+                btn.style.background = "var(--danger) !important";
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                btn.innerHTML = '<i class="fa-solid fa-circle"></i> Start Recording';
+                btn.style.background = "var(--btn-mic-clr) !important";
+            }
+        }
+
+        function performAnalysis() {
+            document.getElementById('resultDashboard').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('engBar').style.width = "78%";
+                document.getElementById('engVal').innerText = "78%";
+                document.getElementById('strsBar').style.width = "15%";
+                document.getElementById('strsVal').innerText = "15%";
+                document.getElementById('statusTag').innerText = "ANALYSIS COMPLETE";
+                document.getElementById('aiAdvice').innerText = "AI Insight: Your facial micro-expressions indicate high engagement and a positive mood trajectory.";
+            }, 500);
+        }
+
+        function saveToHistory() {
+            const date = new Date().toLocaleString();
+            const activity = { date, type: "Video Analysis", result: "78% Engaged" };
+            let history = JSON.parse(localStorage.getItem('videoHistory') || "[]");
+            history.unshift(activity);
+            localStorage.setItem('videoHistory', JSON.stringify(history.slice(0, 5)));
+            loadActivity();
+            showToast();
+        }
+
+        function loadActivity() {
+            const history = JSON.parse(localStorage.getItem('videoHistory') || "[]");
+            const body = document.getElementById('activityBody');
+            body.innerHTML = history.length ? "" : "<tr><td colspan='4' style='text-align:center; opacity:0.5;'>No recent activity</td></tr>";
+            history.forEach(item => {
+                body.innerHTML += `<tr><td>${item.date}</td><td>${item.type}</td><td>${item.result}</td><td><span class="status-pill" style="background:rgba(34, 197, 94, 0.1); color:var(--success)">Processed</span></td></tr>`;
+            });
+        }
+
+        function clearActivity() {
+            localStorage.removeItem('videoHistory');
+            loadActivity();
+        }
+
+        function resetForm() {
+            location.reload();
+        }
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.style.display = 'block';
+            setTimeout(() => toast.style.display = 'none', 3000);
+        }
+
+        function toggleDarkMode() {
+            document.body.classList.toggle("dark");
+            localStorage.setItem('theme', document.body.classList.contains("dark") ? 'dark' : 'light');
+        }
+
+        function loadVideo(e) {
+            const video = document.getElementById('videoPreview');
+            video.srcObject = null;
+            video.src = URL.createObjectURL(e.target.files[0]);
+            video.style.transform = "none";
+            video.controls = true;
+        }
+
+        window.onload = () => {
+            if (localStorage.getItem('theme') === 'dark') document.body.classList.add('dark');
+            const savedMood = localStorage.getItem('selectedMood') || 'neutral';
+            setMood(savedMood, false);
+            initCamera();
+            loadActivity();
+        };
+    </script>
+    </body>
+    </html>

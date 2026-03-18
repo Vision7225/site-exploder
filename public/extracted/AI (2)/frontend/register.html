@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Mental Wellness | Create Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+
+body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    height:100vh;
+    background:linear-gradient(120deg,#dbeafe,#f0fdfa);
+    display:flex;
+}
+
+/* LEFT BRAND PANEL */
+.brand-panel{
+    flex:1;
+    background:linear-gradient(135deg,#1e3a8a,#2563eb);
+    color:white;
+    padding:60px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+}
+
+.brand-panel h1{
+    font-size:3rem;
+    margin-bottom:20px;
+}
+
+.brand-panel p{
+    font-size:1.2rem;
+    max-width:450px;
+    opacity:0.95;
+}
+
+.brand-panel ul{
+    margin-top:30px;
+    list-style:none;
+    padding:0;
+}
+
+.brand-panel li{
+    margin:12px 0;
+    font-size:1rem;
+}
+
+.brand-panel li::before{
+    content:"✔ ";
+    color:#22c55e;
+    font-weight:700;
+}
+
+/* Floating circles */
+.circle{
+    position:absolute;
+    border-radius:50%;
+    opacity:0.25;
+}
+.c1{width:280px;height:280px;background:#38bdf8;top:-60px;right:-60px;}
+.c2{width:180px;height:180px;background:#22c55e;bottom:40px;right:120px;}
+.c3{width:220px;height:220px;background:#a78bfa;bottom:-80px;left:-80px;}
+
+/* RIGHT REGISTER PANEL */
+.register-panel{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f8fafc;
+}
+
+.register-card{
+    width:460px;
+    padding:45px;
+    border-radius:24px;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(15px);
+    box-shadow:0 25px 60px rgba(0,0,0,0.15);
+}
+
+.register-card h2{
+    font-size:1.8rem;
+    margin-bottom:10px;
+    color:#1e293b;
+}
+
+.register-card p{
+    margin-bottom:25px;
+    color:#64748b;
+}
+
+/* INPUTS */
+.input-row{
+    display:flex;
+    gap:12px;
+}
+
+.input-group{
+    margin-bottom:16px;
+    width:100%;
+}
+
+.input-group label{
+    font-size:0.85rem;
+    font-weight:600;
+    color:#334155;
+}
+
+.input-group input{
+    width:100%;
+    padding:14px;
+    margin-top:6px;
+    border-radius:12px;
+    border:1px solid #cbd5e1;
+    font-size:15px;
+}
+
+.input-group input:focus{
+    outline:none;
+    border-color:#2563eb;
+}
+
+/* BUTTON */
+.register-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg,#2563eb,#1e40af);
+    color:white;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    margin-top:10px;
+}
+
+.register-btn:hover{
+    opacity:0.95;
+}
+
+/* EXTRA */
+.extra{
+    text-align:center;
+    margin-top:18px;
+    font-size:0.85rem;
+}
+
+.extra a{
+    color:#2563eb;
+    text-decoration:none;
+    font-weight:600;
+}
+
+/* MOBILE */
+@media(max-width:900px){
+    body{flex-direction:column;}
+    .brand-panel{display:none;}
+}
+</style>
+</head>
+
+<body>
+
+<!-- BRAND SIDE -->
+<div class="brand-panel">
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+    <div class="circle c3"></div>
+
+    <h1>🧠 AI Mental Wellness</h1>
+    <p>
+        Join a secure AI-powered platform focused on mental health,
+        early depression detection & emotional well-being.
+    </p>
+
+    <ul>
+        <li>Scientifically designed assessments</li>
+        <li>Data privacy & confidentiality</li>
+        <li>AI-based mental insights</li>
+        <li>Supportive wellness ecosystem</li>
+    </ul>
+</div>
+
+<!-- REGISTER SIDE -->
+<div class="register-panel">
+    <div class="register-card">
+        <h2>Create Account</h2>
+        <p>Start your mental wellness journey today</p>
+
+        <div class="input-row">
+            <div class="input-group">
+                <label>First Name</label>
+                <input type="text" placeholder="Tanuja">
+            </div>
+            <div class="input-group">
+                <label>Last Name</label>
+                <input type="text" placeholder="Zagge">
+            </div>
+        </div>
+
+        <div class="input-group">
+            <label>Email Address</label>
+            <input type="email" placeholder="name@example.com">
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" placeholder="Minimum 8 characters">
+        </div>
+
+        <div class="input-group">
+            <label>Confirm Password</label>
+            <input type="password" placeholder="Re-enter password">
+        </div>
+
+        <button class="register-btn" type="button" onclick="register()">
+            Create Account
+        </button>
+
+        <div class="extra">
+            Already have an account?
+            <a href="signup.html">Login</a>
+        </div>
+    </div>
+</div>
+
+<script>
+function register(){
+    alert("✅ Account created successfully! Please login to continue.");
+    window.location.href = "signup.html";
+}
+</script>
+
+</body>
+</html>

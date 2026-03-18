@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI-EEG Mental Wellness - Home</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+:root{
+    --bg:#f4f8fb;
+    --text:#1e293b;
+    --card:#ffffff;
+    --primary:#2563eb;
+    --secondary:#1e3a8a;
+}
+
+*{
+    box-sizing:border-box;
+    font-family:'Segoe UI',sans-serif;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+}
+
+/* HEADER */
+
+.top-header{
+    height:65px;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 40px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.05);
+    position:sticky;
+    top:0;
+    z-index:1000;
+}
+
+.logo{
+    font-size:20px;
+    font-weight:600;
+    color:var(--primary);
+}
+
+.top-menu{
+    display:flex;
+    align-items:center;
+    gap:30px;
+}
+
+.top-menu a{
+    text-decoration:none;
+    color:var(--text);
+    font-weight:500;
+    position:relative;
+    transition:0.3s;
+}
+
+.top-menu a:hover{
+    color:var(--primary);
+}
+
+.top-menu a.active{
+    color:var(--primary);
+    font-weight:600;
+}
+
+.top-menu a.active::after{
+    content:"";
+    position:absolute;
+    bottom:-6px;
+    left:0;
+    width:100%;
+    height:3px;
+    background:var(--primary);
+    border-radius:2px;
+}
+
+/* LOGIN */
+
+.login-wrapper{ position:relative; }
+
+.login-icon{
+    width:36px;
+    height:36px;
+    background:var(--primary);
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    cursor:pointer;
+}
+
+.dropdown{
+    position:absolute;
+    top:50px;
+    right:0;
+    background:white;
+    width:190px;
+    border-radius:12px;
+    box-shadow:0 15px 35px rgba(0,0,0,0.15);
+    display:none;
+    overflow:hidden;
+    padding:6px 0;
+}
+
+.dropdown div{
+    padding:12px 18px;
+    font-size:14px;
+    cursor:pointer;
+    transition:0.3s ease;
+}
+
+.dropdown div:hover{
+    background:rgba(37,99,235,0.08);
+    color:var(--primary);
+}
+
+/* MOOD */
+
+.mood-selector{
+    padding:10px 40px;
+}
+
+.mood-selector button{
+    border:none;
+    background:white;
+    margin-right:8px;
+    padding:6px 14px;
+    border-radius:20px;
+    cursor:pointer;
+    transition:0.3s;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+}
+
+.mood-selector button:hover{
+    transform:scale(1.05);
+}
+
+/* CONTENT */
+
+.content{
+    padding:40px;
+}
+
+/* HERO */
+
+.hero{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:40px;
+    padding:35px 60px;
+    border-radius:20px;
+    margin-bottom:50px;
+    min-height:200px;
+    background:linear-gradient(135deg,var(--secondary),var(--primary));
+    color:white;
+    box-shadow:0 12px 30px rgba(0,0,0,0.2);
+    transition:0.5s ease;
+}
+
+.hero-text{ flex:1; }
+
+.hero-text h1{ font-size:28px; margin-bottom:12px; }
+
+.hero-text p{ font-size:15px; line-height:1.6; }
+
+.hero-image{
+    flex:0 0 300px;
+    height:200px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.hero-image img{
+    height:150%;
+    width:auto;
+}
+
+/* MODULE GRID */
+
+.module-grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:20px;
+}
+
+/* Center EEG & Sleep */
+
+.module-grid:first-of-type .module-card:nth-child(4){
+    grid-column:2/3;
+}
+
+.module-grid:first-of-type .module-card:nth-child(5){
+    grid-column:3/4;
+}
+
+.module-card{
+    background:white;
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.06);
+    text-align:center;
+    transition:0.3s;
+}
+
+.module-card:hover{
+    transform:translateY(-6px);
+}
+
+.module-card i{
+    font-size:26px;
+    color:var(--primary);
+}
+
+/* FLOATING EMOJI */
+
+.mood-emoji{
+    position:fixed;
+    font-size:90px;
+    opacity:0.07;
+    pointer-events:none;
+    animation:float 6s infinite alternate ease-in-out;
+    z-index:-1;
+}
+
+@keyframes float{
+    from{transform:translateY(0px);}
+    to{transform:translateY(-50px);}
+}
+
+/* FLOATING BUTTONS */
+
+.floating-btn{
+    position:fixed;
+    bottom:25px;
+    width:55px;
+    height:55px;
+    border-radius:50%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-size:20px;
+    cursor:pointer;
+    box-shadow:0 8px 20px rgba(0,0,0,0.2);
+    transition:0.3s ease;
+    z-index:999;
+}
+
+.chatbot-btn{ left:25px; background:var(--primary); }
+.help-btn{ right:25px; background:var(--primary); }
+
+.floating-btn:hover{
+    transform:scale(1.1);
+}
+
+/* CHATBOT */
+
+.chatbot-container{
+    position:fixed;
+    bottom:90px;
+    left:25px;
+    width:320px;
+    height:420px;
+    background:white;
+    border-radius:20px;
+    box-shadow:0 20px 40px rgba(0,0,0,0.25);
+    display:none;
+    flex-direction:column;
+    overflow:hidden;
+    z-index:999;
+}
+
+.chatbot-header{
+    background:linear-gradient(135deg,var(--secondary),var(--primary));
+    color:white;
+    padding:15px;
+    display:flex;
+    justify-content:space-between;
+    font-weight:600;
+}
+
+.chatbot-messages{
+    flex:1;
+    padding:15px;
+    overflow-y:auto;
+}
+
+.bot-message{
+    background:#f1f5f9;
+    padding:10px 14px;
+    border-radius:15px;
+    margin-bottom:10px;
+    max-width:80%;
+}
+
+.user-message{
+    background:var(--primary);
+    color:white;
+    padding:10px 14px;
+    border-radius:15px;
+    margin-left:auto;
+    margin-bottom:10px;
+    max-width:80%;
+}
+
+.chatbot-input{
+    display:flex;
+    border-top:1px solid #e2e8f0;
+}
+
+.chatbot-input input{
+    flex:1;
+    border:none;
+    padding:12px;
+    outline:none;
+}
+
+.chatbot-input button{
+    background:var(--primary);
+    border:none;
+    color:white;
+    padding:0 18px;
+    cursor:pointer;
+}
+
+footer{
+    background:var(--primary);
+    color:white;
+    text-align:center;
+    padding:12px;
+    margin-top:50px;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="top-header">
+    <div class="logo"><i class="fa-solid fa-brain"></i> AI-EEG Wellness</div>
+    <div class="top-menu">
+        <a href="#" class="active">Home</a>
+        <a href="#">Dashboard</a>
+        <a href="#">About Us</a>
+        <a href="#">Contact Us</a>
+    </div>
+</div>
+
+<div class="mood-selector">
+    <button onclick="setMood('calm')">😌 Calm</button>
+    <button onclick="setMood('happy')">😊 Happy</button>
+    <button onclick="setMood('sad')">😞 Sad</button>
+</div>
+
+<div id="emojiContainer"></div>
+
+<div class="content">
+
+<div class="hero" id="heroBox">
+<div class="hero-text">
+<h1 id="heroTitle">Welcome to Your Mental Wellness Space</h1>
+<p id="heroMessage">
+Your journey toward better emotional health begins here.
+Let AI assist you in understanding patterns and insights.
+</p>
+</div>
+</div>
+
+<h2>Main Detection Modules</h2>
+
+<div class="module-grid">
+<div class="module-card"><i class="fa-solid fa-microphone"></i><h4>Audio Analysis</h4></div>
+<div class="module-card"><i class="fa-solid fa-video"></i><h4>Video Analysis</h4></div>
+<div class="module-card"><i class="fa-solid fa-camera"></i><h4>Image Analysis</h4></div>
+<div class="module-card"><i class="fa-solid fa-brain"></i><h4>EEG Monitoring</h4></div>
+<div class="module-card"><i class="fa-solid fa-bed"></i><h4>Sleep Analysis</h4></div>
+</div>
+
+</div>
+
+<!-- Floating Buttons -->
+<div class="floating-btn chatbot-btn" onclick="openChatbot()">
+<i class="fa-solid fa-comments"></i>
+</div>
+
+<div class="floating-btn help-btn">
+<i class="fa-solid fa-headset"></i>
+</div>
+
+<!-- Chatbot -->
+<div class="chatbot-container" id="chatbotBox">
+<div class="chatbot-header">
+<span>Wellness Assistant</span>
+<i class="fa-solid fa-xmark" onclick="closeChatbot()"></i>
+</div>
+<div class="chatbot-messages" id="chatMessages">
+<div class="bot-message">Hello 👋 How can I support you today?</div>
+</div>
+<div class="chatbot-input">
+<input type="text" id="chatInput" placeholder="Type your message..." />
+<button onclick="sendMessage()"><i class="fa-solid fa-paper-plane"></i></button>
+</div>
+</div>
+
+<footer>© 2025 AI-Driven Mental Wellness Platform</footer>
+
+<script>
+
+function openChatbot(){
+document.getElementById("chatbotBox").style.display="flex";
+}
+
+function closeChatbot(){
+document.getElementById("chatbotBox").style.display="none";
+}
+
+function sendMessage(){
+const input=document.getElementById("chatInput");
+const messages=document.getElementById("chatMessages");
+
+if(input.value.trim()==="") return;
+
+const userDiv=document.createElement("div");
+userDiv.className="user-message";
+userDiv.innerText=input.value;
+messages.appendChild(userDiv);
+
+input.value="";
+messages.scrollTop=messages.scrollHeight;
+
+setTimeout(()=>{
+const botDiv=document.createElement("div");
+botDiv.className="bot-message";
+botDiv.innerText="I'm here for you. Tell me more about how you're feeling.";
+messages.appendChild(botDiv);
+messages.scrollTop=messages.scrollHeight;
+},800);
+}
+
+function setMood(type){
+const root=document.documentElement;
+const container=document.getElementById("emojiContainer");
+container.innerHTML="";
+let emoji="";
+
+if(type==="calm"){ root.style.setProperty('--primary','#0ea5e9'); emoji="😌"; }
+if(type==="happy"){ root.style.setProperty('--primary','#16a34a'); emoji="😊"; }
+if(type==="sad"){ root.style.setProperty('--primary','#334155'); emoji="😞"; }
+
+for(let i=0;i<4;i++){
+let span=document.createElement("span");
+span.className="mood-emoji";
+span.innerText=emoji;
+span.style.left=Math.random()*85+"%";
+span.style.top=Math.random()*75+"%";
+container.appendChild(span);
+}
+}
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html>
+    <textarea id="diaryText" placeholder="Write your diary"></textarea>
+
+<button onclick="sendDiary()">Submit Diary</button>
+<button onclick="sendEEG()">Submit EEG</button>
+<button onclick="getSuggestions()">Get Suggestion</button>
+
+<p id="result"></p>
+<head>
+<meta charset="UTF-8">
+<title>AI-EEG Wellness</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+:root{
+    --primary:#2563eb;
+    --secondary:#06b6d4;
+}
+
+body{
+    margin:0;
+    height:100vh;
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    font-family:'Segoe UI',sans-serif;
+    color:white;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    overflow:hidden;
+}
+
+/* Animated Grid Background */
+body::before{
+    content:"";
+    position:absolute;
+    width:200%;
+    height:200%;
+    background:
+        linear-gradient(90deg,rgba(255,255,255,0.1) 1px,transparent 1px),
+        linear-gradient(rgba(255,255,255,0.1) 1px,transparent 1px);
+    background-size:40px 40px;
+    animation:moveGrid 20s linear infinite;
+    opacity:0.2;
+}
+@keyframes moveGrid{
+    from{transform:translate(0,0);}
+    to{transform:translate(-40px,-40px);}
+}
+
+/* Splash */
+.splash{
+    text-align:center;
+    z-index:2;
+    position:relative;
+    transition:opacity 0.8s ease;
+}
+
+/* Brain */
+.brain{
+    font-size:100px;
+    margin-bottom:20px;
+    position:relative;
+    animation:pulse 2s infinite;
+}
+
+@keyframes pulse{
+    0%{transform:scale(1);}
+    50%{transform:scale(1.15);}
+    100%{transform:scale(1);}
+}
+
+/* Holographic Glow */
+.brain::after{
+    content:"";
+    position:absolute;
+    top:50%;
+    left:50%;
+    width:180px;
+    height:180px;
+    border-radius:50%;
+    transform:translate(-50%,-50%);
+    box-shadow:0 0 40px white;
+    animation:glow 2s infinite alternate;
+}
+@keyframes glow{
+    from{opacity:0.3;}
+    to{opacity:0.8;}
+}
+
+/* Scan Line */
+.scan{
+    position:absolute;
+    top:0;
+    left:0;
+    width:100%;
+    height:4px;
+    background:rgba(255,255,255,0.7);
+    animation:scanMove 2s infinite;
+}
+@keyframes scanMove{
+    0%{top:0;}
+    100%{top:100%;}
+}
+
+/* Text */
+h1{
+    margin:0;
+    font-size:34px;
+}
+
+.status{
+    margin-top:15px;
+    font-size:16px;
+    height:20px;
+}
+
+/* Loader */
+.loader{
+    width:320px;
+    height:6px;
+    background:rgba(255,255,255,0.3);
+    border-radius:10px;
+    margin:30px auto 10px;
+    overflow:hidden;
+}
+
+.progress{
+    height:100%;
+    width:0%;
+    background:white;
+    border-radius:10px;
+    transition:width 0.2s;
+}
+
+.percent{
+    font-size:14px;
+}
+
+/* System Ready Flash */
+.ready{
+    position:absolute;
+    bottom:-40px;
+    left:50%;
+    transform:translateX(-50%);
+    font-size:18px;
+    font-weight:bold;
+    opacity:0;
+    transition:opacity 0.5s;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="splash" id="splash">
+
+    <div class="brain">
+        <div class="scan"></div>
+        <i class="fa-solid fa-brain"></i>
+    </div>
+
+    <h1>AI-EEG Wellness</h1>
+
+    <div class="status" id="statusText">
+        Booting AI Core...
+    </div>
+
+    <div class="loader">
+        <div class="progress" id="progressBar"></div>
+    </div>
+
+    <div class="percent" id="percentText">0%</div>
+
+    <div class="ready" id="readyText">SYSTEM READY</div>
+
+</div>
+
+<script>
+
+let progress = 0;
+let bar = document.getElementById("progressBar");
+let percentText = document.getElementById("percentText");
+let splash = document.getElementById("splash");
+let statusText = document.getElementById("statusText");
+let readyText = document.getElementById("readyText");
+
+let loading = setInterval(function(){
+
+    progress++;
+    bar.style.width = progress + "%";
+    percentText.innerText = progress + "%";
+
+    if(progress == 30){
+        statusText.innerText = "Initializing Neural Engine...";
+    }
+    if(progress == 60){
+        statusText.innerText = "Loading Multi-Modal Detection...";
+    }
+    if(progress == 85){
+        statusText.innerText = "Establishing Secure Session...";
+    }
+
+    if(progress >= 100){
+        clearInterval(loading);
+
+        statusText.innerText = "System Ready";
+        readyText.style.opacity = "1";
+
+        // AI Voice
+        let msg = new SpeechSynthesisUtterance("System Ready. Welcome to AI EEG Wellness.");
+        speechSynthesis.speak(msg);
+
+        setTimeout(function(){
+            splash.style.opacity="0";
+            setTimeout(function(){
+                window.location.href="login.html";
+            },800);
+        },2000);
+    }
+
+},25);
+
+// Send Diary
+function sendDiary() {
+  fetch("http://127.0.0.1:8000/diary", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: "1",
+      text: document.getElementById("diaryText").value
+    })
+  })
+  .then(res => res.json())
+  .then(data => console.log(data));
+}
+
+
+// Send EEG
+function sendEEG() {
+  fetch("http://127.0.0.1:8000/eeg", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      user_id: "1",
+      stress_level: "high"
+    })
+  })
+  .then(res => res.json())
+  .then(data => console.log(data));
+}
+
+
+// Get Suggestions
+function getSuggestions() {
+  fetch("http://127.0.0.1:8000/suggestions/1")
+    .then(res => res.json())
+    .then(data => {
+      console.log(data);
+      document.getElementById("result").innerText = data.suggestion;
+    });
+}
+
+</script>
+
+</body>
+</html>
+

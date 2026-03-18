@@ -14,7 +14,7 @@ const moodMessages: Record<string, { title: string; message: string }> = {
 const vitals = [
   { icon: Heart, label: "Stress Level", value: "Medium", color: "text-destructive" },
   { icon: Smile, label: "Primary Emotion", value: "Positive", color: "text-warning" },
-  { icon: Moon, label: "Sleep Score", value: "85/100", color: "text-indigo-500" },
+  { icon: Moon, label: "Sleep Score", value: "85/100", color: "text-primary" },
 ];
 
 const activities = [

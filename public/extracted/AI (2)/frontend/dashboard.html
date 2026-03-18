@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI-EEG Wellness - Dashboard</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+
+:root{
+    --primary:#2563eb;
+    --secondary:#06b6d4;
+    --bg:#f4f8fb;
+    --card:rgba(255,255,255,0.75);
+    --text:#1e293b;
+}
+
+body{
+    margin:0;
+    font-family:'Segoe UI',sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    overflow-x:hidden;
+}
+
+/* Animated background */
+body::before{
+    content:"";
+    position:fixed;
+    width:100%;
+    height:100%;
+    background:radial-gradient(circle at 20% 30%,rgba(37,99,235,0.2),transparent),
+               radial-gradient(circle at 80% 70%,rgba(6,182,212,0.2),transparent);
+    animation:moveBg 12s infinite alternate ease-in-out;
+    z-index:-1;
+}
+@keyframes moveBg{
+    from{background-position:0% 0%;}
+    to{background-position:100% 100%;}
+}
+
+/* NAVBAR */
+.navbar{
+    height:60px;
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 30px;
+}
+
+/* MOOD SELECTOR */
+.mood{
+    padding:20px 60px;
+}
+.mood button{
+    border:none;
+    padding:8px 15px;
+    border-radius:20px;
+    margin-right:10px;
+    cursor:pointer;
+}
+
+/* MAIN */
+.main{
+    padding:40px 60px;
+}
+
+/* HERO */
+.hero{
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+    padding:40px;
+    border-radius:25px;
+    margin-bottom:50px;
+}
+
+/* SCORE */
+.score-box{
+    display:flex;
+    justify-content:center;
+    margin-bottom:50px;
+}
+
+.circle{
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    background:conic-gradient(var(--primary) 0%, #e5e7eb 0%);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    box-shadow:0 0 50px rgba(37,99,235,0.4);
+    animation:float 3s ease-in-out infinite;
+}
+@keyframes float{
+    0%{transform:translateY(0);}
+    50%{transform:translateY(-10px);}
+    100%{transform:translateY(0);}
+}
+
+.circle span{
+    width:170px;
+    height:170px;
+    border-radius:50%;
+    background:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    font-weight:bold;
+}
+
+/* GRID */
+.grid{
+    display:grid;
+    grid-template-columns:repeat(3,1fr);
+    gap:30px;
+}
+
+.card{
+    background:var(--card);
+    backdrop-filter:blur(15px);
+    padding:30px;
+    border-radius:25px;
+    box-shadow:0 20px 50px rgba(0,0,0,0.08);
+}
+
+.progress{
+    height:10px;
+    background:#e5e7eb;
+    border-radius:30px;
+    margin-top:15px;
+    overflow:hidden;
+}
+.bar{
+    height:10px;
+    width:0;
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    border-radius:30px;
+    transition:1.5s ease;
+}
+
+/* AI BOX */
+.ai-box{
+    margin-top:60px;
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+    padding:40px;
+    border-radius:25px;
+    box-shadow:0 20px 50px rgba(37,99,235,0.3);
+    position:relative;
+}
+
+/* AI Pulse */
+.ai-box::after{
+    content:"";
+    position:absolute;
+    top:-10px;
+    right:-10px;
+    width:20px;
+    height:20px;
+    background:#22c55e;
+    border-radius:50%;
+    animation:pulseAI 2s infinite;
+}
+@keyframes pulseAI{
+    0%{box-shadow:0 0 0 0 rgba(34,197,94,0.7);}
+    70%{box-shadow:0 0 0 15px rgba(34,197,94,0);}
+    100%{box-shadow:0 0 0 0 rgba(34,197,94,0);}
+}
+
+@media(max-width:900px){
+    .grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+    .grid{grid-template-columns:1fr;}
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+    <div><i class="fa-solid fa-brain"></i> AI-EEG Wellness</div>
+</div>
+
+<div class="mood">
+    <button onclick="setMood('calm')">😌 Calm</button>
+    <button onclick="setMood('neutral')">😐 Neutral</button>
+    <button onclick="setMood('sad')">😞 Sad</button>
+    <button onclick="setMood('happy')">😊 Happy</button>
+    <button onclick="setMood('angry')">😡 Angry</button>
+</div>
+
+<div class="main">
+
+    <div class="hero">
+        <h2 id="heroText">Your Emotional Intelligence Dashboard</h2>
+    </div>
+
+    <div class="score-box">
+        <div class="circle" id="scoreCircle">
+            <span id="scoreText">0%</span>
+        </div>
+    </div>
+
+    <div class="grid">
+
+        <div class="card">
+            Audio
+            <div class="progress"><div class="bar" data-value="65"></div></div>
+        </div>
+
+        <div class="card">
+            Visual
+            <div class="progress"><div class="bar" data-value="50"></div></div>
+        </div>
+
+        <div class="card">
+            EEG
+            <div class="progress"><div class="bar" data-value="55"></div></div>
+        </div>
+
+    </div>
+
+    <div class="ai-box">
+        <h3>AI Insight</h3>
+        <p id="insightText">
+            Emotional stability is improving. Continue journaling.
+        </p>
+    </div>
+
+</div>
+
+<script>
+
+/* LIVE SCORE COUNTER */
+function animateScore(target){
+    let score = 0;
+    let interval = setInterval(()=>{
+        score++;
+        document.getElementById("scoreText").innerText = score+"%";
+        document.getElementById("scoreCircle").style.background =
+            `conic-gradient(var(--primary) ${score}%, #e5e7eb 0%)`;
+        if(score>=target) clearInterval(interval);
+    },20);
+}
+
+/* Animate Bars */
+function animateBars(){
+    document.querySelectorAll(".bar").forEach(bar=>{
+        bar.style.width = bar.getAttribute("data-value")+"%";
+    });
+}
+
+/* Mood Sync */
+function setMood(type){
+
+    let hero = document.getElementById("heroText");
+    let insight = document.getElementById("insightText");
+
+    if(type==="calm"){
+        setTheme('#2563eb','#06b6d4');
+        hero.innerText="Calm Emotional State";
+        insight.innerText="Balanced emotional activity detected.";
+    }
+
+    if(type==="sad"){
+        setTheme('#475569','#334155');
+        hero.innerText="Low Emotional Phase";
+        insight.innerText="Consider journaling or chatbot support.";
+    }
+
+    if(type==="happy"){
+        setTheme('#16a34a','#22c55e');
+        hero.innerText="Positive Emotional Energy";
+        insight.innerText="Keep maintaining healthy routines.";
+    }
+
+    if(type==="angry"){
+        setTheme('#b91c1c','#f97316');
+        hero.innerText="High Emotional Intensity";
+        insight.innerText="Breathing exercise recommended.";
+    }
+
+    if(type==="neutral"){
+        setTheme('#64748b','#94a3b8');
+        hero.innerText="Stable Emotional Phase";
+        insight.innerText="Continue daily monitoring.";
+    }
+
+    animateBars();
+}
+
+/* Helper */
+function setTheme(p,s){
+    document.documentElement.style.setProperty('--primary',p);
+    document.documentElement.style.setProperty('--secondary',s);
+}
+
+animateScore(78);
+setTimeout(animateBars,500);
+
+</script>
+
+</body>
+</html>

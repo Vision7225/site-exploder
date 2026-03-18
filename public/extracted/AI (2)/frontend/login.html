@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Mental Wellness | Secure Login</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+*{box-sizing:border-box}
+body{
+    margin:0;
+    font-family:'Inter',sans-serif;
+    height:100vh;
+    background:linear-gradient(120deg,#dbeafe,#f0fdfa);
+    display:flex;
+}
+
+/* LEFT BRAND PANEL */
+.brand-panel{
+    flex:1;
+    background:linear-gradient(135deg,#1e3a8a,#2563eb);
+    color:white;
+    padding:60px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    position:relative;
+    overflow:hidden;
+}
+
+.brand-panel h1{font-size:3rem;margin-bottom:20px;}
+.brand-panel p{font-size:1.2rem;max-width:450px;opacity:0.95;}
+
+.brand-panel ul{margin-top:30px;list-style:none;padding:0;}
+.brand-panel li{margin:12px 0;font-size:1rem;}
+.brand-panel li::before{content:"✔ ";color:#22c55e;font-weight:700;}
+
+.circle{position:absolute;border-radius:50%;opacity:0.25;}
+.c1{width:280px;height:280px;background:#38bdf8;top:-60px;right:-60px;}
+.c2{width:180px;height:180px;background:#22c55e;bottom:40px;right:120px;}
+.c3{width:220px;height:220px;background:#a78bfa;bottom:-80px;left:-80px;}
+
+/* RIGHT LOGIN PANEL */
+.login-panel{
+    flex:1;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:#f8fafc;
+}
+
+.login-card{
+    width:420px;
+    padding:45px;
+    border-radius:24px;
+    background:rgba(255,255,255,0.85);
+    backdrop-filter:blur(15px);
+    box-shadow:0 25px 60px rgba(0,0,0,0.15);
+}
+
+.login-card h2{font-size:1.8rem;margin-bottom:10px;color:#1e293b;}
+.login-card p{margin-bottom:30px;color:#64748b;}
+
+.input-group{margin-bottom:18px;}
+.input-group label{font-size:0.85rem;font-weight:600;color:#334155;}
+.input-group input{
+    width:100%;
+    padding:14px;
+    margin-top:6px;
+    border-radius:12px;
+    border:1px solid #cbd5e1;
+    font-size:15px;
+}
+
+.login-btn{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:14px;
+    background:linear-gradient(135deg,#2563eb,#1e40af);
+    color:white;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+}
+
+.extra{
+    display:flex;
+    justify-content:space-between;
+    margin-top:18px;
+    font-size:0.85rem;
+}
+.extra a{color:#2563eb;text-decoration:none;font-weight:600;}
+
+@media(max-width:900px){
+    body{flex-direction:column;}
+    .brand-panel{display:none;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="brand-panel">
+    <div class="circle c1"></div>
+    <div class="circle c2"></div>
+    <div class="circle c3"></div>
+
+    <h1>🧠 AI EEG Mental Wellness</h1>
+    <p>Secure AI-powered platform for early depression detection.</p>
+
+    <ul>
+        <li>Medical-grade AI insights</li>
+        <li>Secure & private data</li>
+        <li>Real-time monitoring</li>
+        <li>Healthcare ready</li>
+    </ul>
+</div>
+
+<div class="login-panel">
+    <div class="login-card">
+        <h2>Welcome Back 👋</h2>
+        <p>Login to continue</p>
+
+        <div class="input-group">
+            <label>Email</label>
+            <input type="text" id="username" placeholder="Username">
+
+        </div>
+
+        <div class="input-group">
+            <label>Password</label>
+            <input type="password" id="password" placeholder="Password">
+        </div>
+
+        <button onclick="loginUser()">Login</button>
+
+        <div class="extra">
+            <a href="#">Forgot Password?</a>
+            <a href="register.html">Create Account</a>
+        </div>
+    </div>
+</div>
+
+<script>
+
+function loginUser() {
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    fetch("http://127.0.0.1:8000/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+
+        if (data.status === "success") {
+
+            // ✅ SAVE USER ID
+            localStorage.setItem("user_id", data.user_id);
+
+            alert("Login successful!");
+
+            // ✅ REDIRECT
+            window.location.href = "home.html";
+
+        } else {
+            alert("Invalid login!");
+        }
+
+    });
+}
+
+</script>
+<script>
+function loginUser() {
+    alert("Button clicked!");  // 👈 test
+
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    fetch("http://127.0.0.1:8000/login", {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({
+            username: username,
+            password: password
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        console.log(data);
+
+        if (data.status === "success") {
+            localStorage.setItem("user_id", data.user_id);
+            alert("Login successful");
+            window.location.href = "home.html";
+        } else {
+            alert("Login failed");
+        }
+    });
+}
+</script>
+
+</body>
+</html>

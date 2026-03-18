@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI-EEG Wellness – Sleep Tracker</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+<style>
+:root{
+    --bg:#f4f8fb;
+    --text:#1e293b;
+    --card:#ffffff;
+    --primary:#2563eb;
+    --secondary:#06b6d4;
+}
+
+*{box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    transition:0.4s ease;
+}
+
+/* NAVBAR */
+.navbar{
+    height:60px;
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 25px;
+}
+
+/* MOOD SELECTOR */
+.mood-selector{
+    padding:10px 20px;
+}
+
+/* MAIN LAYOUT */
+.main{
+    display:flex;
+    min-height:calc(100vh - 60px);
+}
+
+/* SIDEBAR */
+.sidebar{
+    width:240px;
+    background:var(--card);
+    padding-top:20px;
+    box-shadow:4px 0 15px rgba(0,0,0,0.05);
+}
+.sidebar a{
+    display:block;
+    padding:12px 20px;
+    text-decoration:none;
+    color:var(--text);
+}
+.sidebar a.active{
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+}
+
+/* CONTENT */
+.content{
+    flex:1;
+    padding:30px;
+}
+
+/* HERO */
+.hero{
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+    padding:40px;
+    border-radius:18px;
+    margin-bottom:40px;
+}
+
+/* SUMMARY GRID */
+.summary-grid{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:20px;
+    margin-bottom:30px;
+}
+.summary-card{
+    background:var(--card);
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.05);
+    text-align:center;
+}
+.summary-card h3{
+    margin:0;
+    font-size:22px;
+    color:var(--primary);
+}
+
+/* CARD STYLE */
+.card{
+    background:var(--card);
+    padding:25px;
+    border-radius:18px;
+    box-shadow:0 8px 25px rgba(0,0,0,0.05);
+    margin-bottom:30px;
+}
+
+input{
+    padding:8px;
+    border-radius:8px;
+    border:1px solid #ccc;
+}
+
+button{
+    padding:8px 16px;
+    border:none;
+    border-radius:10px;
+    background:linear-gradient(120deg,var(--primary),var(--secondary));
+    color:white;
+    cursor:pointer;
+}
+
+.history-item{
+    display:flex;
+    justify-content:space-between;
+    padding:6px 0;
+    border-bottom:1px solid #eee;
+}
+
+.delete{
+    color:red;
+    cursor:pointer;
+}
+
+@media(max-width:900px){
+.summary-grid{grid-template-columns:repeat(2,1fr);}
+}
+@media(max-width:600px){
+.sidebar{display:none;}
+.summary-grid{grid-template-columns:1fr;}
+}
+</style>
+</head>
+
+<body>
+
+<div class="navbar">
+<div>🧠 AI-EEG Wellness</div>
+<div>Sleep Tracker</div>
+</div>
+
+<div class="mood-selector">
+<button onclick="setMood('calm')">😌</button>
+<button onclick="setMood('neutral')">😐</button>
+<button onclick="setMood('sad')">😞</button>
+<button onclick="setMood('happy')">😊</button>
+<button onclick="setMood('angry')">😡</button>
+</div>
+
+<div class="main">
+
+<div class="sidebar">
+<a href="#">Dashboard</a>
+<a href="#">Upload Media</a>
+<a href="#">Diary</a>
+<a href="#">Chatbot</a>
+<a href="#">Weekly Report</a>
+<a href="#">Auto Data Deletion</a>
+<a href="#">Doctor Support</a>
+<a href="#" class="active">Sleep Tracker</a>
+</div>
+
+<div class="content">
+
+<div class="hero">
+<h2>Sleep Analysis & Tracking</h2>
+<p>Monitor your sleep patterns and improve mental wellness.</p>
+</div>
+
+<!-- SUMMARY -->
+<div class="summary-grid">
+<div class="summary-card">
+<h3 id="lastSleep">0 hrs</h3>
+<p>Last Night</p>
+</div>
+
+<div class="summary-card">
+<h3 id="quality">--</h3>
+<p>Quality</p>
+</div>
+
+<div class="summary-card">
+<h3 id="weeklyAvg">0 hrs</h3>
+<p>Weekly Avg</p>
+</div>
+
+<div class="summary-card">
+<h3 id="score">0%</h3>
+<p>Sleep Score</p>
+</div>
+</div>
+
+<!-- INPUT -->
+<div class="card">
+<h3>Add Sleep Record</h3>
+<label>Bed Time: <input type="time" id="bedTime"></label>
+<label>Wake Time: <input type="time" id="wakeTime"></label>
+<button onclick="calculateSleep()">Save</button>
+<p id="duration"></p>
+</div>
+
+<!-- CHART -->
+<div class="card">
+<h3>Weekly Sleep Chart</h3>
+<canvas id="sleepChart"></canvas>
+</div>
+
+<!-- AI PREDICTION CARD ADD करा - HISTORY च्या वर -->
+
+<div class="card">
+<h3>AI Sleep Prediction</h3>
+
+<label>Sleep Duration (hrs): 
+<input type="number" id="durationInput">
+</label>
+
+<label>Stress Level (1-10): 
+<input type="number" id="stressInput">
+</label>
+
+<label>Physical Activity Level (1-10): 
+<input type="number" id="activityInput">
+</label>
+
+<button onclick="analyzeSleep()">Predict</button>
+
+<p id="mlResult" style="margin-top:15px;font-weight:600;"></p>
+</div>
+
+<!-- HISTORY -->
+<div class="card">
+<h3>Sleep History</h3>
+<div id="historyList"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+let chart;
+const IDEAL_SLEEP = 8; // 8 hours standard
+
+function calculateSleep(){
+
+let bed=document.getElementById("bedTime").value;
+let wake=document.getElementById("wakeTime").value;
+
+if(!bed || !wake){
+alert("Enter both times");
+return;
+}
+
+let bedTime=new Date(`1970-01-01T${bed}`);
+let wakeTime=new Date(`1970-01-01T${wake}`);
+
+if(wakeTime<bedTime){
+wakeTime.setDate(wakeTime.getDate()+1);
+}
+
+let hours=((wakeTime-bedTime)/(1000*60*60)).toFixed(1);
+
+document.getElementById("duration").innerText="Total Sleep: "+hours+" hrs";
+
+saveRecord(parseFloat(hours));
+}
+
+function saveRecord(hours){
+
+let data=JSON.parse(localStorage.getItem("sleepData"))||[];
+
+/* Keep only last 7 records */
+if(data.length>=7){
+data.shift();
+}
+
+data.push({
+hours:hours,
+date:new Date().toLocaleDateString()
+});
+
+localStorage.setItem("sleepData",JSON.stringify(data));
+
+updateUI();
+}
+
+function updateUI(){
+
+let data=JSON.parse(localStorage.getItem("sleepData"))||[];
+
+if(data.length===0)return;
+
+let last=data[data.length-1];
+document.getElementById("lastSleep").innerText=last.hours+" hrs";
+
+/* Weekly Average */
+let avg=(data.reduce((a,b)=>a+b.hours,0)/data.length).toFixed(1);
+document.getElementById("weeklyAvg").innerText=avg+" hrs";
+
+/* Sleep Efficiency */
+let efficiency=Math.min(100,Math.round((avg/IDEAL_SLEEP)*100));
+document.getElementById("score").innerText=efficiency+"%";
+
+/* Quality Logic */
+let quality="Poor";
+if(avg>=7.5) quality="Excellent";
+else if(avg>=6.5) quality="Good";
+else if(avg>=5.5) quality="Moderate";
+
+document.getElementById("quality").innerText=quality;
+
+/* AI Insight */
+generateInsight(avg, efficiency);
+
+renderHistory();
+renderChart();
+}
+
+function generateInsight(avg, efficiency){
+
+let insightText="";
+
+if(efficiency>=90){
+insightText="Your sleep consistency is strong. Maintain current routine.";
+}
+else if(efficiency>=75){
+insightText="You are close to optimal sleep. Reduce screen time before bed.";
+}
+else if(efficiency>=60){
+insightText="Irregular sleep pattern detected. Try fixed bedtime schedule.";
+}
+else{
+insightText="High sleep debt detected. Mental wellness may be impacted.";
+}
+
+if(!document.getElementById("aiInsight")){
+let div=document.createElement("div");
+div.id="aiInsight";
+div.className="card";
+div.innerHTML="<h3>AI Sleep Insight</h3><p id='insightText'></p>";
+document.querySelector(".content").appendChild(div);
+}
+
+document.getElementById("insightText").innerText=insightText;
+}
+
+function renderHistory(){
+let data=JSON.parse(localStorage.getItem("sleepData"))||[];
+let container=document.getElementById("historyList");
+container.innerHTML="";
+
+data.slice().reverse().forEach((item,index)=>{
+container.innerHTML+=`
+<div class="history-item">
+<span>${item.date} - ${item.hours} hrs</span>
+<span class="delete" onclick="deleteRecord(${data.length-1-index})">Delete</span>
+</div>`;
+});
+}
+
+function deleteRecord(index){
+let data=JSON.parse(localStorage.getItem("sleepData"))||[];
+data.splice(index,1);
+localStorage.setItem("sleepData",JSON.stringify(data));
+updateUI();
+}
+
+function renderChart(){
+
+let data=JSON.parse(localStorage.getItem("sleepData"))||[];
+let hours=data.map(d=>d.hours);
+
+if(chart) chart.destroy();
+
+chart=new Chart(document.getElementById("sleepChart"),{
+type:'line',
+data:{
+labels:data.map(d=>d.date),
+datasets:[{
+label:"Sleep Hours",
+data:hours,
+borderColor:"#2563eb",
+fill:false,
+tension:0.3
+}]
+},
+options:{
+scales:{
+y:{beginAtZero:true,max:10}
+}
+}
+});
+}
+
+updateUI();
+
+async function analyzeSleep(){
+
+let duration = parseFloat(document.getElementById("durationInput").value);
+let stress = parseFloat(document.getElementById("stressInput").value);
+let activity = parseFloat(document.getElementById("activityInput").value);
+
+if(!duration || !stress || !activity){
+alert("Fill all fields");
+return;
+}
+
+try{
+
+let response = await fetch("http://127.0.0.1:8000/predict",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify({
+duration: duration,
+stress: stress,
+activity: activity
+})
+});
+
+let result = await response.json();
+
+let score = parseInt(result.prediction);
+
+let quality = "Poor";
+if(score >= 8) quality = "Excellent";
+else if(score >= 6) quality = "Good";
+else if(score >= 4) quality = "Moderate";
+
+document.getElementById("mlResult").innerText =
+"AI Score: " + score + "/10  |  Quality: " + quality;
+
+}
+catch(error){
+document.getElementById("mlResult").innerText =
+"Backend not connected. Start FastAPI server.";
+}
+
+}
+
+</script>
+
+</body>
+</html>

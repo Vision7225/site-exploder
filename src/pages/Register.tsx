@@ -14,8 +14,8 @@ export default function RegisterPage() {
     <div className="min-h-screen flex flex-col md:flex-row">
       {/* Brand Panel */}
       <div className="flex-1 text-primary-foreground p-12 md:p-16 flex flex-col justify-center relative overflow-hidden" style={{ background: "var(--gradient-hero)" }}>
-        <div className="absolute w-[280px] h-[280px] rounded-full bg-sky-400/25 -top-16 -right-16" />
-        <div className="absolute w-[220px] h-[220px] rounded-full bg-violet-400/25 -bottom-20 -left-20" />
+        <div className="absolute w-[280px] h-[280px] rounded-full bg-secondary/25 -top-16 -right-16" />
+        <div className="absolute w-[220px] h-[220px] rounded-full bg-accent/25 -bottom-20 -left-20" />
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <Brain className="w-10 h-10" />

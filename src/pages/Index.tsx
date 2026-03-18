@@ -1,55 +1,98 @@
 import { useState } from "react";
-import FileTree, { FileNode } from "@/components/FileTree";
-import ExtractorStage from "@/components/ExtractorStage";
+import AppLayout from "@/components/AppLayout";
+import MoodSelector from "@/components/MoodSelector";
+import { Heart, Smile, Moon, Mic, Brain, Lightbulb } from "lucide-react";
 
-const fileTree: FileNode[] = [
-  {
-    name: "AI (2)",
-    path: "AI (2)",
-    type: "directory",
-    children: [
-      {
-        name: "fastapi_project",
-        path: "AI (2)/fastapi_project",
-        type: "directory",
-        children: [
-          { name: "ai_engine.py", path: "AI (2)/fastapi_project/ai_engine.py", type: "file", size: 248 },
-          { name: "database.py", path: "AI (2)/fastapi_project/database.py", type: "file", size: 296 },
-          { name: "main.py", path: "AI (2)/fastapi_project/main.py", type: "file", size: 2723 },
-          { name: "models.py", path: "AI (2)/fastapi_project/models.py", type: "file", size: 599 },
-        ],
-      },
-      {
-        name: "frontend",
-        path: "AI (2)/frontend",
-        type: "directory",
-        children: [
-          { name: "audio.html", path: "AI (2)/frontend/audio.html", type: "file", size: 17887 },
-          { name: "chatbot.html", path: "AI (2)/frontend/chatbot.html", type: "file", size: 9820 },
-          { name: "dashboard.html", path: "AI (2)/frontend/dashboard.html", type: "file", size: 7151 },
-          { name: "diary.html", path: "AI (2)/frontend/diary.html", type: "file", size: 9556 },
-          { name: "eeg.html", path: "AI (2)/frontend/eeg.html", type: "file", size: 15768 },
-          { name: "home.html", path: "AI (2)/frontend/home.html", type: "file", size: 18974 },
-          { name: "image.html", path: "AI (2)/frontend/image.html", type: "file", size: 18428 },
-          { name: "index.html", path: "AI (2)/frontend/index.html", type: "file", size: 5731 },
-          { name: "login.html", path: "AI (2)/frontend/login.html", type: "file", size: 5335 },
-          { name: "register.html", path: "AI (2)/frontend/register.html", type: "file", size: 5115 },
-          { name: "sleep.html", path: "AI (2)/frontend/sleep.html", type: "file", size: 9726 },
-          { name: "text.html", path: "AI (2)/frontend/text.html", type: "file", size: 21620 },
-          { name: "video.html", path: "AI (2)/frontend/video.html", type: "file", size: 22706 },
-        ],
-      },
-    ],
-  },
+const moodMessages: Record<string, { title: string; message: string }> = {
+  calm: { title: "Stay Calm 😌", message: "Breath in... Breath out. Your mind is at peace." },
+  happy: { title: "Feeling Great! 😊", message: "Keep this energy going! Your wellness score is up." },
+  neutral: { title: "Stay Steady 😐", message: "Balance is the key to life. Keep monitoring." },
+  sad: { title: "Take it Easy 😞", message: "It's okay to not be okay. Try a breathing exercise." },
+  angry: { title: "Cool Down 😡", message: "You are in control. Let's try some meditation." },
+};
+
+const vitals = [
+  { icon: Heart, label: "Stress Level", value: "Medium", color: "text-destructive" },
+  { icon: Smile, label: "Primary Emotion", value: "Positive", color: "text-warning" },
+  { icon: Moon, label: "Sleep Score", value: "85/100", color: "text-primary" },
 ];
 
-export default function Index() {
-  const [selectedFile, setSelectedFile] = useState<string | undefined>();
+const activities = [
+  { icon: Mic, module: "Audio Analysis", time: "10:30 AM", result: "Calm 😌", status: "Completed" },
+  { icon: Brain, module: "EEG Scan", time: "Yesterday", result: "Focused ⚡", status: "Completed" },
+];
+
+export default function HomePage() {
+  const [mood, setMood] = useState("happy");
+  const currentMood = moodMessages[mood] || moodMessages.happy;
 
   return (
-    <div className="grid grid-cols-[280px_1fr] h-screen bg-background text-foreground">
-      <FileTree tree={fileTree} onFileSelect={setSelectedFile} selectedFile={selectedFile} />
-      <ExtractorStage selectedFile={selectedFile} totalFiles={27} totalSize="175.1 KB" />
-    </div>
+    <AppLayout>
+      <div className="space-y-6 max-w-5xl">
+        {/* Mood Selector */}
+        <MoodSelector selected={mood} onSelect={setMood} />
+
+        {/* Hero */}
+        <section className="rounded-lg p-8 text-primary-foreground" style={{ background: "var(--gradient-hero)" }}>
+          <h1 className="text-2xl font-bold m-0">{currentMood.title}</h1>
+          <p className="mt-2 opacity-90">{currentMood.message}</p>
+        </section>
+
+        {/* AI Recommendation */}
+        <div className="bg-card rounded-lg p-6 border-l-4 border-primary flex items-center gap-5 shadow-sm">
+          <Lightbulb className="w-8 h-8 text-primary shrink-0" />
+          <div>
+            <p className="text-xs uppercase tracking-widest font-bold text-primary mb-1">AI Recommendation</p>
+            <p className="text-sm text-foreground">Your EEG shows increased beta waves. Could you try a 5-minute meditation?</p>
+          </div>
+        </div>
+
+        {/* Vitals */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Today's Vitals</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            {vitals.map((v) => (
+              <div key={v.label} className="bg-card rounded-lg p-6 text-center shadow-sm">
+                <v.icon className={`w-8 h-8 mx-auto mb-3 ${v.color}`} />
+                <h3 className="text-xs uppercase tracking-widest text-muted-foreground font-semibold">{v.label}</h3>
+                <p className="text-2xl font-bold text-foreground mt-2">{v.value}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Recent Activity */}
+        <div>
+          <h2 className="text-lg font-semibold mb-4">Recent Activity</h2>
+          <div className="bg-card rounded-lg p-6 shadow-sm overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="text-left text-xs uppercase text-muted-foreground">
+                  <th className="pb-3 font-semibold">Module</th>
+                  <th className="pb-3 font-semibold">Time</th>
+                  <th className="pb-3 font-semibold">Result</th>
+                  <th className="pb-3 font-semibold">Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {activities.map((a, i) => (
+                  <tr key={i} className="border-t border-border">
+                    <td className="py-4 flex items-center gap-2 text-sm">
+                      <a.icon className="w-4 h-4 text-primary" />
+                      {a.module}
+                    </td>
+                    <td className="py-4 text-sm text-muted-foreground">{a.time}</td>
+                    <td className="py-4 text-sm">{a.result}</td>
+                    <td className="py-4">
+                      <span className="px-3 py-1 rounded-full text-xs font-bold bg-success/10 text-success">{a.status}</span>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </AppLayout>
   );
 }

@@ -1,15 +1,28 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
-import { Brain } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import { Brain, Loader2 } from "lucide-react";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "@/hooks/use-toast";
 
 export default function LoginPage() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    // For now, just redirect to home
-    window.location.href = "/";
+    setLoading(true);
+    try {
+      const { error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) throw error;
+      toast({ title: "Login successful! 🎉" });
+      navigate("/");
+    } catch (err: any) {
+      toast({ title: "Login failed", description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -19,7 +32,6 @@ export default function LoginPage() {
         <div className="absolute w-[280px] h-[280px] rounded-full bg-secondary/25 -top-16 -right-16" />
         <div className="absolute w-[180px] h-[180px] rounded-full bg-success/25 bottom-10 right-32" />
         <div className="absolute w-[220px] h-[220px] rounded-full bg-accent/25 -bottom-20 -left-20" />
-
         <div className="relative z-10">
           <div className="flex items-center gap-3 mb-6">
             <Brain className="w-10 h-10" />
@@ -47,10 +59,11 @@ export default function LoginPage() {
             <div>
               <label className="text-xs font-semibold text-foreground">Email</label>
               <input
-                type="text"
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Username"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="your@email.com"
+                required
                 className="w-full mt-1.5 px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
@@ -61,15 +74,17 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password"
+                required
                 className="w-full mt-1.5 px-4 py-3 rounded-xl border border-border bg-background text-foreground text-sm outline-none focus:ring-2 focus:ring-primary"
               />
             </div>
             <button
               type="submit"
-              className="w-full py-3.5 rounded-xl text-primary-foreground font-bold text-base transition-all hover:opacity-90"
+              disabled={loading}
+              className="w-full py-3.5 rounded-xl text-primary-foreground font-bold text-base transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
               style={{ background: "var(--gradient-hero)" }}
             >
-              Login
+              {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Logging in...</> : "Login"}
             </button>
           </form>
 

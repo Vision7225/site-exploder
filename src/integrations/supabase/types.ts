@@ -14,7 +14,60 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      analysis_results: {
+        Row: {
+          analysis_type: string
+          created_at: string
+          id: string
+          input_summary: string | null
+          result: Json
+          user_id: string | null
+        }
+        Insert: {
+          analysis_type: string
+          created_at?: string
+          id?: string
+          input_summary?: string | null
+          result?: Json
+          user_id?: string | null
+        }
+        Update: {
+          analysis_type?: string
+          created_at?: string
+          id?: string
+          input_summary?: string | null
+          result?: Json
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      diary_entries: {
+        Row: {
+          ai_analysis: Json | null
+          created_at: string
+          id: string
+          mood: string | null
+          text: string
+          user_id: string | null
+        }
+        Insert: {
+          ai_analysis?: Json | null
+          created_at?: string
+          id?: string
+          mood?: string | null
+          text: string
+          user_id?: string | null
+        }
+        Update: {
+          ai_analysis?: Json | null
+          created_at?: string
+          id?: string
+          mood?: string | null
+          text?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

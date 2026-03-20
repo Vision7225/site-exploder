@@ -15,6 +15,7 @@ import AudioAnalysis from "./pages/AudioAnalysis";
 import VideoAnalysis from "./pages/VideoAnalysis";
 import EEGScan from "./pages/EEGScan";
 import NotFound from "./pages/NotFound";
+import ChatWidget from "./components/ChatWidget";
 
 const queryClient = new QueryClient();
 

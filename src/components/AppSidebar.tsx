@@ -3,7 +3,7 @@ import { Brain, LayoutDashboard, Image, Mic, Video, FileText, BookOpen, Bed, Act
 
 const navSections = [
   {
-    title: "AI Analysis Tools",
+    title: "AI Analysis",
     links: [
       { to: "/eeg", icon: Brain, label: "EEG Live Scan" },
       { to: "/image", icon: Image, label: "Image Analysis" },
@@ -13,7 +13,7 @@ const navSections = [
     ],
   },
   {
-    title: "Wellness & Solutions",
+    title: "Wellness",
     links: [
       { to: "/diary", icon: BookOpen, label: "AI Diary" },
       { to: "/sleep", icon: Bed, label: "Sleep Tracker" },
@@ -31,29 +31,35 @@ export default function AppSidebar() {
   const location = useLocation();
 
   return (
-    <aside className="w-[260px] bg-card border-r border-border h-[calc(100vh-65px)] fixed top-[65px] left-0 overflow-y-auto py-2 hidden md:block">
+    <aside className="w-[256px] bg-card/60 backdrop-blur-xl border-r border-border/50 h-[calc(100vh-64px)] fixed top-16 left-0 overflow-y-auto py-4 hidden md:flex flex-col gap-1">
       {navSections.map((section) => (
-        <div key={section.title}>
-          <h3 className="px-6 pt-4 pb-1 text-[11px] uppercase tracking-widest font-semibold text-muted-foreground">
+        <div key={section.title} className="px-3">
+          <h3 className="px-3 pt-4 pb-2 text-[10px] uppercase tracking-[0.12em] font-semibold text-muted-foreground/70">
             {section.title}
           </h3>
-          {section.links.map((link) => {
-            const isActive = location.pathname === link.to;
-            return (
-              <NavLink
-                key={link.to}
-                to={link.to}
-                className={`flex items-center gap-3 px-6 py-3 text-sm transition-colors ${
-                  isActive
-                    ? "bg-primary/10 text-primary border-r-4 border-primary font-semibold"
-                    : "text-foreground hover:bg-primary/5 hover:text-primary"
-                }`}
-              >
-                <link.icon className="w-4 h-4" />
-                {link.label}
-              </NavLink>
-            );
-          })}
+          <div className="space-y-0.5">
+            {section.links.map((link) => {
+              const isActive = location.pathname === link.to;
+              return (
+                <NavLink
+                  key={link.to}
+                  to={link.to}
+                  className={`flex items-center gap-3 px-3 py-2.5 rounded-xl text-[13px] font-medium transition-all ${
+                    isActive
+                      ? "bg-primary/10 text-primary shadow-sm"
+                      : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
+                  }`}
+                >
+                  <div className={`w-8 h-8 rounded-lg flex items-center justify-center transition-colors ${
+                    isActive ? "bg-primary/15" : "bg-muted/50"
+                  }`}>
+                    <link.icon className="w-4 h-4" />
+                  </div>
+                  {link.label}
+                </NavLink>
+              );
+            })}
+          </div>
         </div>
       ))}
     </aside>

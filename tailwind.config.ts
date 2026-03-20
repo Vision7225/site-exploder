@@ -14,7 +14,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['Inter', 'Segoe UI', 'system-ui', 'sans-serif'],
+        sans: ['"Plus Jakarta Sans"', 'system-ui', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",
@@ -85,12 +85,12 @@ export default {
         },
         "float": {
           "0%, 100%": { transform: "translateY(0)" },
-          "50%": { transform: "translateY(-10px)" },
+          "50%": { transform: "translateY(-8px)" },
         },
         "pulse-glow": {
-          "0%": { boxShadow: "0 0 0 0 rgba(34, 197, 94, 0.7)" },
-          "70%": { boxShadow: "0 0 0 15px rgba(34, 197, 94, 0)" },
-          "100%": { boxShadow: "0 0 0 0 rgba(34, 197, 94, 0)" },
+          "0%": { boxShadow: "0 0 0 0 hsla(152, 60%, 42%, 0.6)" },
+          "70%": { boxShadow: "0 0 0 12px hsla(152, 60%, 42%, 0)" },
+          "100%": { boxShadow: "0 0 0 0 hsla(152, 60%, 42%, 0)" },
         },
       },
       animation: {

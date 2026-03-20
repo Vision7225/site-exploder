@@ -2,7 +2,7 @@ import { useState, useRef } from "react";
 import AppLayout from "@/components/AppLayout";
 import AnalysisResultCard from "@/components/AnalysisResultCard";
 import { useAnalysis } from "@/hooks/useAnalysis";
-import { Image, Upload, Loader2 } from "lucide-react";
+import { Image, Upload, Loader2, ImagePlus } from "lucide-react";
 
 export default function ImageAnalysisPage() {
   const { analyze, loading, result } = useAnalysis("image");
@@ -12,12 +12,8 @@ export default function ImageAnalysisPage() {
   const handleFile = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-
     const reader = new FileReader();
-    reader.onload = (ev) => {
-      const dataUrl = ev.target?.result as string;
-      setPreview(dataUrl);
-    };
+    reader.onload = (ev) => setPreview(ev.target?.result as string);
     reader.readAsDataURL(file);
   };
 
@@ -30,39 +26,34 @@ export default function ImageAnalysisPage() {
   return (
     <AppLayout>
       <div className="max-w-3xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <Image className="w-7 h-7 text-primary" />
+        <div className="reveal">
+          <h1 className="page-title">
+            <div className="w-10 h-10 rounded-xl bg-success/10 flex items-center justify-center">
+              <Image className="w-5 h-5 text-success" />
+            </div>
             Image Analysis
           </h1>
-          <p className="text-muted-foreground mt-1">Upload an image to detect emotions and get AI wellness insights.</p>
+          <p className="page-subtitle">Upload an image to detect emotions and get AI wellness insights</p>
         </div>
 
-        {/* Upload Area */}
-        <div
-          onClick={() => fileRef.current?.click()}
-          className="bg-card border-2 border-dashed border-border rounded-lg p-12 text-center cursor-pointer hover:border-primary transition-colors"
-        >
+        <div onClick={() => fileRef.current?.click()} className="upload-zone reveal reveal-delay-1">
           {preview ? (
-            <img src={preview} alt="Preview" className="max-h-64 mx-auto rounded-lg" />
+            <img src={preview} alt="Preview" className="max-h-64 mx-auto rounded-xl" style={{ boxShadow: "var(--shadow-md)" }} />
           ) : (
             <div className="space-y-3">
-              <Upload className="w-12 h-12 mx-auto text-muted-foreground" />
-              <p className="text-muted-foreground">Click to upload an image</p>
-              <p className="text-xs text-muted-foreground">JPG, PNG up to 10MB</p>
+              <div className="w-16 h-16 rounded-2xl bg-muted/60 flex items-center justify-center mx-auto">
+                <ImagePlus className="w-8 h-8 text-muted-foreground/60" />
+              </div>
+              <p className="text-muted-foreground font-medium">Click to upload an image</p>
+              <p className="text-xs text-muted-foreground/60">JPG, PNG up to 10MB</p>
             </div>
           )}
           <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} className="hidden" />
         </div>
 
         {preview && (
-          <button
-            onClick={handleAnalyze}
-            disabled={loading}
-            className="w-full py-3 rounded-xl text-primary-foreground font-bold transition-all hover:opacity-90 disabled:opacity-50 flex items-center justify-center gap-2"
-            style={{ background: "var(--gradient-hero)" }}
-          >
-            {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Analyzing...</> : "Analyze Image"}
+          <button onClick={handleAnalyze} disabled={loading} className="gradient-btn w-full py-3.5 flex items-center justify-center gap-2 reveal">
+            {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Analyzing…</> : "Analyze Image"}
           </button>
         )}
 

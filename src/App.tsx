@@ -39,6 +39,7 @@ const App = () => (
           <Route path="/text" element={<TextAnalysis />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <ChatWidget />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

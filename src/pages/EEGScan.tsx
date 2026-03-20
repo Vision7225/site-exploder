@@ -25,31 +25,29 @@ function generateWavePoint(time: number): WavePoint {
   };
 }
 
+const waveColors = {
+  alpha: "hsl(225, 73%, 57%)",
+  beta: "hsl(0, 72%, 56%)",
+  theta: "hsl(152, 60%, 42%)",
+  delta: "hsl(36, 90%, 52%)",
+  gamma: "hsl(256, 65%, 58%)",
+};
+
 export default function EEGScanPage() {
   const { analyze, loading, result } = useAnalysis("eeg");
   const [scanning, setScanning] = useState(false);
   const [data, setData] = useState<WavePoint[]>([]);
   const [elapsed, setElapsed] = useState(0);
 
-  const startScan = useCallback(() => {
-    setScanning(true);
-    setData([]);
-    setElapsed(0);
-  }, []);
-
-  const stopScan = useCallback(() => {
-    setScanning(false);
-  }, []);
+  const startScan = useCallback(() => { setScanning(true); setData([]); setElapsed(0); }, []);
+  const stopScan = useCallback(() => { setScanning(false); }, []);
 
   useEffect(() => {
     if (!scanning) return;
     const interval = setInterval(() => {
       setElapsed((prev) => {
         const next = prev + 1;
-        setData((d) => {
-          const newData = [...d, generateWavePoint(next)];
-          return newData.slice(-60); // keep last 60 data points
-        });
+        setData((d) => [...d, generateWavePoint(next)].slice(-60));
         return next;
       });
     }, 200);
@@ -58,104 +56,75 @@ export default function EEGScanPage() {
 
   const handleAnalyze = () => {
     if (data.length === 0) return;
-    const avgAlpha = Math.round(data.reduce((s, d) => s + d.alpha, 0) / data.length);
-    const avgBeta = Math.round(data.reduce((s, d) => s + d.beta, 0) / data.length);
-    const avgTheta = Math.round(data.reduce((s, d) => s + d.theta, 0) / data.length);
-    const avgDelta = Math.round(data.reduce((s, d) => s + d.delta, 0) / data.length);
-    const avgGamma = Math.round(data.reduce((s, d) => s + d.gamma, 0) / data.length);
-
-    const content = `EEG brainwave data recorded over ${elapsed} intervals.
-Average readings: Alpha=${avgAlpha}Hz, Beta=${avgBeta}Hz, Theta=${avgTheta}Hz, Delta=${avgDelta}Hz, Gamma=${avgGamma}Hz.
-Peak Alpha=${Math.max(...data.map(d => d.alpha))}Hz, Peak Beta=${Math.max(...data.map(d => d.beta))}Hz.
-Data points collected: ${data.length}. Analyze stress, focus, relaxation levels and provide wellness recommendations.`;
-
+    const avg = (key: keyof WavePoint) => Math.round(data.reduce((s, d) => s + (d[key] as number), 0) / data.length);
+    const peak = (key: keyof WavePoint) => Math.max(...data.map(d => d[key] as number));
+    const content = `EEG brainwave data recorded over ${elapsed} intervals. Average: Alpha=${avg("alpha")}Hz, Beta=${avg("beta")}Hz, Theta=${avg("theta")}Hz, Delta=${avg("delta")}Hz, Gamma=${avg("gamma")}Hz. Peak Alpha=${peak("alpha")}Hz, Peak Beta=${peak("beta")}Hz. ${data.length} data points. Analyze stress, focus, relaxation and provide wellness recommendations.`;
     analyze(content);
-  };
-
-  const waveColors = {
-    alpha: "hsl(221, 83%, 53%)",
-    beta: "hsl(0, 84%, 60%)",
-    theta: "hsl(142, 71%, 45%)",
-    delta: "hsl(38, 92%, 50%)",
-    gamma: "hsl(280, 70%, 55%)",
   };
 
   return (
     <AppLayout>
       <div className="max-w-4xl space-y-6">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground flex items-center gap-3">
-            <Brain className="w-7 h-7 text-primary" />
+        <div className="reveal">
+          <h1 className="page-title">
+            <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ background: "var(--gradient-primary)" }}>
+              <Brain className="w-5 h-5 text-primary-foreground" />
+            </div>
             EEG Live Scan
           </h1>
-          <p className="text-muted-foreground mt-1">Simulated brainwave monitoring with AI-powered stress analysis.</p>
+          <p className="page-subtitle">Simulated brainwave monitoring with AI-powered stress analysis</p>
         </div>
 
         {/* Controls */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3 reveal reveal-delay-1">
           {!scanning ? (
-            <button
-              onClick={startScan}
-              className="px-6 py-3 rounded-xl text-primary-foreground font-bold flex items-center gap-2 transition-all hover:opacity-90"
-              style={{ background: "var(--gradient-hero)" }}
-            >
+            <button onClick={startScan} className="gradient-btn px-6 py-3 flex items-center gap-2">
               <Play className="w-5 h-5" /> Start Scan
             </button>
           ) : (
-            <button
-              onClick={stopScan}
-              className="px-6 py-3 rounded-xl bg-destructive text-destructive-foreground font-bold flex items-center gap-2 transition-all hover:opacity-90"
-            >
+            <button onClick={stopScan} className="px-6 py-3 rounded-xl bg-destructive text-destructive-foreground font-semibold flex items-center gap-2 transition-all active:scale-97 hover:shadow-lg">
               <Square className="w-5 h-5" /> Stop Scan
             </button>
           )}
-
           {data.length > 10 && !scanning && (
-            <button
-              onClick={handleAnalyze}
-              disabled={loading}
-              className="px-6 py-3 rounded-xl bg-success text-success-foreground font-bold flex items-center gap-2 transition-all hover:opacity-90 disabled:opacity-50"
-            >
+            <button onClick={handleAnalyze} disabled={loading} className="px-6 py-3 rounded-xl font-semibold flex items-center gap-2 text-success-foreground transition-all active:scale-97" style={{ background: "var(--gradient-success)" }}>
               {loading ? <><Loader2 className="w-5 h-5 animate-spin" /> Analyzing...</> : "Analyze Brainwaves"}
             </button>
           )}
-
           {scanning && (
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-destructive animate-pulse" />
-              <span className="text-sm text-muted-foreground font-medium">Recording... {(elapsed * 0.2).toFixed(1)}s</span>
+            <div className="flex items-center gap-2 ml-2">
+              <div className="w-2.5 h-2.5 rounded-full bg-destructive animate-pulse" />
+              <span className="text-sm text-muted-foreground font-medium tabular-nums">Recording… {(elapsed * 0.2).toFixed(1)}s</span>
             </div>
           )}
         </div>
 
-        {/* Live Chart */}
-        <div className="bg-card rounded-lg p-6 shadow-sm border border-border">
-          <h3 className="font-semibold text-foreground mb-4">Brainwave Activity</h3>
-          <ResponsiveContainer width="100%" height={300}>
+        {/* Chart */}
+        <div className="section-card reveal reveal-delay-2">
+          <h3 className="font-semibold text-foreground mb-4 text-sm">Brainwave Activity</h3>
+          <ResponsiveContainer width="100%" height={280}>
             <LineChart data={data}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(214, 32%, 91%)" />
-              <XAxis dataKey="time" tick={{ fontSize: 11 }} stroke="hsl(215, 16%, 47%)" />
-              <YAxis tick={{ fontSize: 11 }} stroke="hsl(215, 16%, 47%)" />
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+              <XAxis dataKey="time" tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
+              <YAxis tick={{ fontSize: 11 }} stroke="hsl(var(--muted-foreground))" />
               <Legend />
-              <Line type="monotone" dataKey="alpha" stroke={waveColors.alpha} dot={false} strokeWidth={2} name="Alpha" />
-              <Line type="monotone" dataKey="beta" stroke={waveColors.beta} dot={false} strokeWidth={2} name="Beta" />
-              <Line type="monotone" dataKey="theta" stroke={waveColors.theta} dot={false} strokeWidth={2} name="Theta" />
-              <Line type="monotone" dataKey="delta" stroke={waveColors.delta} dot={false} strokeWidth={1.5} name="Delta" />
-              <Line type="monotone" dataKey="gamma" stroke={waveColors.gamma} dot={false} strokeWidth={1.5} name="Gamma" />
+              {Object.entries(waveColors).map(([key, color]) => (
+                <Line key={key} type="monotone" dataKey={key} stroke={color} dot={false} strokeWidth={2} name={key.charAt(0).toUpperCase() + key.slice(1)} />
+              ))}
             </LineChart>
           </ResponsiveContainer>
         </div>
 
         {/* Live Metrics */}
         {data.length > 0 && (
-          <div className="grid grid-cols-5 gap-3">
+          <div className="grid grid-cols-5 gap-3 reveal reveal-delay-3">
             {Object.entries(waveColors).map(([wave, color]) => {
               const last = data[data.length - 1];
               return (
-                <div key={wave} className="bg-card rounded-lg p-4 text-center shadow-sm border border-border">
-                  <div className="w-3 h-3 rounded-full mx-auto mb-2" style={{ background: color }} />
-                  <p className="text-xs text-muted-foreground uppercase font-semibold">{wave}</p>
-                  <p className="text-xl font-bold text-foreground">{last[wave as keyof WavePoint]}Hz</p>
+                <div key={wave} className="glass-card p-4 text-center">
+                  <div className="w-3 h-3 rounded-full mx-auto mb-2" style={{ background: color, boxShadow: `0 0 10px ${color}40` }} />
+                  <p className="stat-label">{wave}</p>
+                  <p className="text-xl font-bold text-foreground tabular-nums">{last[wave as keyof WavePoint]}Hz</p>
                 </div>
               );
             })}

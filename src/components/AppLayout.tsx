@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { useLocation } from "react-router-dom";
 import AppHeader from "./AppHeader";
 import AppSidebar from "./AppSidebar";
@@ -21,12 +21,13 @@ const ROUTE_VARIANTS: Record<string, AnimVariant> = {
 export default function AppLayout({ children }: { children: ReactNode }) {
   const location = useLocation();
   const variant = ROUTE_VARIANTS[location.pathname] || "neurons";
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-background relative">
       <AnimatedBackground variant={variant} />
-      <AppHeader />
-      <AppSidebar />
+      <AppHeader onMenuToggle={() => setMobileMenuOpen((v) => !v)} />
+      <AppSidebar mobileOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)} />
       <main className="md:ml-[256px] pt-24 p-5 md:p-8 relative z-10">
         {children}
       </main>

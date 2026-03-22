@@ -3,6 +3,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { AuthProvider } from "@/hooks/useAuth";
+import ProtectedRoute from "@/components/ProtectedRoute";
 import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
@@ -25,21 +27,23 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/diary" element={<Diary />} />
-          <Route path="/sleep" element={<Sleep />} />
-          <Route path="/eeg" element={<EEGScan />} />
-          <Route path="/image" element={<ImageAnalysis />} />
-          <Route path="/audio" element={<AudioAnalysis />} />
-          <Route path="/video" element={<VideoAnalysis />} />
-          <Route path="/text" element={<TextAnalysis />} />
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-        <ChatWidget />
+        <AuthProvider>
+          <Routes>
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/" element={<ProtectedRoute><Index /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/diary" element={<ProtectedRoute><Diary /></ProtectedRoute>} />
+            <Route path="/sleep" element={<ProtectedRoute><Sleep /></ProtectedRoute>} />
+            <Route path="/eeg" element={<ProtectedRoute><EEGScan /></ProtectedRoute>} />
+            <Route path="/image" element={<ProtectedRoute><ImageAnalysis /></ProtectedRoute>} />
+            <Route path="/audio" element={<ProtectedRoute><AudioAnalysis /></ProtectedRoute>} />
+            <Route path="/video" element={<ProtectedRoute><VideoAnalysis /></ProtectedRoute>} />
+            <Route path="/text" element={<ProtectedRoute><TextAnalysis /></ProtectedRoute>} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <ChatWidget />
+        </AuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

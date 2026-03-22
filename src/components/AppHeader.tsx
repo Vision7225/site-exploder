@@ -1,6 +1,6 @@
-import { Brain, User, Menu, X } from "lucide-react";
+import { Brain, User, LogOut } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
-import { useState } from "react";
+import { useAuth } from "@/hooks/useAuth";
 
 const topLinks = [
   { to: "/", label: "Home" },
@@ -9,7 +9,7 @@ const topLinks = [
 
 export default function AppHeader() {
   const location = useLocation();
-  const [mobileOpen, setMobileOpen] = useState(false);
+  const { user, signOut } = useAuth();
 
   return (
     <header className="h-16 bg-card/70 backdrop-blur-xl flex items-center justify-between px-6 fixed top-0 w-full z-50 border-b border-border/50" style={{ boxShadow: "var(--shadow-sm)" }}>
@@ -37,9 +37,20 @@ export default function AppHeader() {
             </Link>
           );
         })}
-        <div className="ml-2 w-9 h-9 rounded-xl bg-muted flex items-center justify-center text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary cursor-pointer">
-          <User className="w-4 h-4" />
-        </div>
+        {user && (
+          <div className="flex items-center gap-1.5 ml-2">
+            <div className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center text-muted-foreground" title={user.email || ""}>
+              <User className="w-4 h-4" />
+            </div>
+            <button
+              onClick={signOut}
+              className="w-9 h-9 rounded-xl bg-muted flex items-center justify-center text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive"
+              title="Sign out"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
       </nav>
     </header>
   );

@@ -1,5 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { Brain, LayoutDashboard, Image, Mic, Video, FileText, BookOpen, Bed, Activity, X } from "lucide-react";
+import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 
 const navSections = [
   {
@@ -34,6 +35,14 @@ interface AppSidebarProps {
 
 export default function AppSidebar({ mobileOpen = false, onClose }: AppSidebarProps) {
   const location = useLocation();
+  const x = useMotionValue(0);
+  const backdropOpacity = useTransform(x, [-280, 0], [0, 0.5]);
+
+  const handleDragEnd = (_: any, info: PanInfo) => {
+    if (info.offset.x < -80 || info.velocity.x < -300) {
+      onClose?.();
+    }
+  };
 
   const navContent = (
     <>
@@ -78,11 +87,29 @@ export default function AppSidebar({ mobileOpen = false, onClose }: AppSidebarPr
         {navContent}
       </aside>
 
-      {/* Mobile overlay */}
+      {/* Mobile overlay with swipe */}
       {mobileOpen && (
         <div className="fixed inset-0 z-40 md:hidden">
-          <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-          <aside className="absolute top-0 left-0 w-[280px] h-full bg-card/95 backdrop-blur-xl border-r border-border/50 overflow-y-auto py-4 flex flex-col gap-1 animate-in slide-in-from-left duration-300">
+          <motion.div
+            className="absolute inset-0 bg-black backdrop-blur-sm"
+            style={{ opacity: backdropOpacity }}
+            onClick={onClose}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 0.5 }}
+            exit={{ opacity: 0 }}
+          />
+          <motion.aside
+            className="absolute top-0 left-0 w-[280px] h-full bg-card/95 backdrop-blur-xl border-r border-border/50 overflow-y-auto py-4 flex flex-col gap-1 touch-pan-y"
+            initial={{ x: -280 }}
+            animate={{ x: 0 }}
+            exit={{ x: -280 }}
+            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+            style={{ x }}
+            drag="x"
+            dragConstraints={{ left: -280, right: 0 }}
+            dragElastic={0.1}
+            onDragEnd={handleDragEnd}
+          >
             <div className="flex items-center justify-between px-5 pb-2">
               <span className="text-sm font-bold text-foreground">Menu</span>
               <button onClick={onClose} className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:bg-muted/60 transition-colors">
@@ -90,7 +117,7 @@ export default function AppSidebar({ mobileOpen = false, onClose }: AppSidebarPr
               </button>
             </div>
             {navContent}
-          </aside>
+          </motion.aside>
         </div>
       )}
     </>

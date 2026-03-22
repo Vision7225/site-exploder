@@ -27,7 +27,7 @@ export default function AppLayout({ children }: { children: ReactNode }) {
       <AnimatedBackground variant={variant} />
       <AppHeader />
       <AppSidebar />
-      <main className="md:ml-[256px] pt-16 p-5 md:p-8 relative z-10">
+      <main className="md:ml-[256px] pt-20 p-5 md:p-8 relative z-10">
         {children}
       </main>
     </div>

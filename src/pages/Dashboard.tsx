@@ -1,12 +1,17 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import AppLayout from "@/components/AppLayout";
 import MoodSelector from "@/components/MoodSelector";
+import MentalStatePrediction from "@/components/MentalStatePrediction";
+import RecommendationEngine from "@/components/RecommendationEngine";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/hooks/useAuth";
+import { classifyMentalState, type MentalStateResult } from "@/lib/mentalStateClassifier";
 import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell, CartesianGrid,
+  LineChart, Line, PieChart, Pie, Cell, CartesianGrid, AreaChart, Area, Legend,
 } from "recharts";
-import { Brain, Image, Mic, Video, FileText, Activity, TrendingUp, Calendar } from "lucide-react";
+import { Brain, Image, Mic, Video, FileText, Activity, TrendingUp, Calendar, Zap } from "lucide-react";
+import { motion } from "framer-motion";
 
 const moodConfig: Record<string, { title: string; insight: string; color: string }> = {
   calm: { title: "Calm Emotional State", insight: "Balanced emotional activity detected.", color: "hsl(195, 85%, 47%)" },
@@ -26,6 +31,7 @@ const TYPE_META: Record<string, { icon: typeof Brain; label: string; color: stri
 const PIE_COLORS = Object.values(TYPE_META).map((m) => m.color);
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [mood, setMood] = useState("calm");
   const [score, setScore] = useState(0);
   const [analyses, setAnalyses] = useState<any[]>([]);
@@ -40,10 +46,11 @@ export default function DashboardPage() {
   }, [mood]);
 
   useEffect(() => {
-    supabase.from("analysis_results").select("*").order("created_at", { ascending: false }).limit(50)
+    supabase.from("analysis_results").select("*").order("created_at", { ascending: false }).limit(200)
       .then(({ data }) => { if (data) setAnalyses(data); });
   }, []);
 
+  // ─── Derived data ──────────────────────────────────────────────
   const typeCounts = analyses.reduce<Record<string, number>>((a, r) => { a[r.analysis_type] = (a[r.analysis_type] || 0) + 1; return a; }, {});
   const pieData = Object.entries(typeCounts).map(([name, value]) => ({ name: TYPE_META[name]?.label || name, value }));
   const moodTimeline = analyses.filter((a) => a.result?.mood_score != null).slice(0, 15).reverse().map((a, i) => ({ idx: i + 1, score: Number(a.result.mood_score) }));
@@ -51,6 +58,78 @@ export default function DashboardPage() {
   const stressBarData = Object.entries(stressData).map(([name, count]) => ({ name, count }));
   const totalAnalyses = analyses.length;
   const avgMood = moodTimeline.length ? (moodTimeline.reduce((s, m) => s + m.score, 0) / moodTimeline.length).toFixed(1) : "—";
+
+  // ─── Mental state prediction from latest EEG ──────────────────
+  const latestEeg = analyses.find((a) => a.analysis_type === "eeg");
+  const mentalStatePrediction: MentalStateResult | null = useMemo(() => {
+    if (!latestEeg?.result) return null;
+    const r = latestEeg.result;
+    // Try to extract band averages from the analysis result or input
+    const alpha = r.alpha_avg || r.alpha || 30;
+    const beta = r.beta_avg || r.beta || 20;
+    const theta = r.theta_avg || r.theta || 15;
+    const delta = r.delta_avg || r.delta || 40;
+    const gamma = r.gamma_avg || r.gamma || 8;
+    return classifyMentalState({ alpha, beta, theta, delta, gamma });
+  }, [latestEeg]);
+
+  // ─── Latest stress for recommendations ────────────────────────
+  const latestStress = useMemo(() => {
+    const eegWithStress = analyses.find((a) => a.result?.stress_level || a.result?.stress_index);
+    if (!eegWithStress) return 35; // default low
+    const sl = eegWithStress.result.stress_level;
+    if (typeof sl === "number") return sl;
+    if (sl === "high") return 80;
+    if (sl === "medium") return 55;
+    return 25;
+  }, [analyses]);
+
+  // ─── Daily stress report (last 7 days) ────────────────────────
+  const dailyStressReport = useMemo(() => {
+    const days: Record<string, { total: number; count: number }> = {};
+    analyses.forEach((a) => {
+      const date = new Date(a.created_at).toLocaleDateString("en-US", { weekday: "short", month: "short", day: "numeric" });
+      if (!days[date]) days[date] = { total: 0, count: 0 };
+      const sl = a.result?.stress_level;
+      const stressVal = typeof sl === "number" ? sl : sl === "high" ? 80 : sl === "medium" ? 55 : sl === "low" ? 25 : null;
+      if (stressVal !== null) {
+        days[date].total += stressVal;
+        days[date].count += 1;
+      }
+    });
+    return Object.entries(days)
+      .map(([day, d]) => ({ day, stress: d.count > 0 ? Math.round(d.total / d.count) : 0 }))
+      .filter((d) => d.stress > 0)
+      .slice(0, 7)
+      .reverse();
+  }, [analyses]);
+
+  // ─── Weekly trend (group by week) ─────────────────────────────
+  const weeklyTrend = useMemo(() => {
+    const weeks: Record<string, { moodTotal: number; stressTotal: number; count: number }> = {};
+    analyses.forEach((a) => {
+      const d = new Date(a.created_at);
+      const weekStart = new Date(d);
+      weekStart.setDate(d.getDate() - d.getDay());
+      const key = weekStart.toLocaleDateString("en-US", { month: "short", day: "numeric" });
+      if (!weeks[key]) weeks[key] = { moodTotal: 0, stressTotal: 0, count: 0 };
+      if (a.result?.mood_score != null) {
+        weeks[key].moodTotal += Number(a.result.mood_score);
+        weeks[key].count += 1;
+      }
+      const sl = a.result?.stress_level;
+      const sv = typeof sl === "number" ? sl : sl === "high" ? 80 : sl === "medium" ? 55 : sl === "low" ? 25 : 0;
+      if (sv > 0) weeks[key].stressTotal += sv;
+    });
+    return Object.entries(weeks)
+      .map(([week, w]) => ({
+        week,
+        mood: w.count > 0 ? +(w.moodTotal / w.count).toFixed(1) : 0,
+        stress: w.count > 0 ? Math.round(w.stressTotal / w.count) : 0,
+      }))
+      .filter((w) => w.mood > 0 || w.stress > 0)
+      .slice(-6);
+  }, [analyses]);
 
   const statCards = [
     { label: "Total Analyses", value: totalAnalyses, icon: Activity, accent: "text-primary", bg: "bg-primary/8" },
@@ -69,6 +148,7 @@ export default function DashboardPage() {
           <div className="relative">
             <h2 className="text-2xl font-bold">{config.title}</h2>
             <p className="mt-1.5 opacity-80 text-sm">{config.insight}</p>
+            {user && <p className="mt-2 text-xs opacity-60">Logged in as {user.email}</p>}
           </div>
         </section>
 
@@ -85,6 +165,16 @@ export default function DashboardPage() {
               <p className="stat-value">{s.value}</p>
             </div>
           ))}
+        </div>
+
+        {/* ── Mental State Prediction ────────────────────────────────── */}
+        <div className="reveal reveal-delay-2">
+          <MentalStatePrediction prediction={mentalStatePrediction} />
+        </div>
+
+        {/* ── Recommendation Engine ─────────────────────────────────── */}
+        <div className="section-card reveal reveal-delay-3">
+          <RecommendationEngine stressPercent={latestStress} />
         </div>
 
         {/* Score + Timeline */}
@@ -110,6 +200,61 @@ export default function DashboardPage() {
                 </LineChart>
               </ResponsiveContainer>
             ) : <p className="text-muted-foreground text-sm text-center mt-16">Run analyses to see trends</p>}
+          </div>
+        </div>
+
+        {/* ── Daily Stress Report + Weekly Trend ────────────────────── */}
+        <div className="grid md:grid-cols-2 gap-6 reveal reveal-delay-4">
+          <div className="section-card">
+            <div className="flex items-center gap-2 mb-4">
+              <Zap className="w-4 h-4 text-destructive" />
+              <p className="stat-label">Daily Stress Report</p>
+            </div>
+            {dailyStressReport.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={dailyStressReport}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="day" tick={{ fontSize: 9 }} />
+                  <YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
+                  <Tooltip formatter={(val: number) => [`${val}%`, "Avg Stress"]} />
+                  <Bar dataKey="stress" radius={[6, 6, 0, 0]}>
+                    {dailyStressReport.map((d, i) => (
+                      <Cell key={i} fill={d.stress >= 70 ? "hsl(0, 72%, 56%)" : d.stress >= 40 ? "hsl(36, 90%, 52%)" : "hsl(152, 60%, 42%)"} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            ) : <p className="text-muted-foreground text-sm text-center mt-16">No stress data yet</p>}
+          </div>
+
+          <div className="section-card">
+            <div className="flex items-center gap-2 mb-4">
+              <TrendingUp className="w-4 h-4 text-primary" />
+              <p className="stat-label">Weekly Trend</p>
+            </div>
+            {weeklyTrend.length > 0 ? (
+              <ResponsiveContainer width="100%" height={200}>
+                <AreaChart data={weeklyTrend}>
+                  <defs>
+                    <linearGradient id="moodGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(225, 73%, 57%)" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="hsl(225, 73%, 57%)" stopOpacity={0.02} />
+                    </linearGradient>
+                    <linearGradient id="stressGradWeek" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="hsl(0, 72%, 56%)" stopOpacity={0.3} />
+                      <stop offset="100%" stopColor="hsl(0, 72%, 56%)" stopOpacity={0.02} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                  <XAxis dataKey="week" tick={{ fontSize: 9 }} />
+                  <YAxis tick={{ fontSize: 10 }} />
+                  <Tooltip />
+                  <Legend verticalAlign="top" height={28} />
+                  <Area type="monotone" dataKey="mood" stroke="hsl(225, 73%, 57%)" fill="url(#moodGrad)" strokeWidth={2} name="Mood (0-10)" />
+                  <Area type="monotone" dataKey="stress" stroke="hsl(0, 72%, 56%)" fill="url(#stressGradWeek)" strokeWidth={2} name="Stress %" />
+                </AreaChart>
+              </ResponsiveContainer>
+            ) : <p className="text-muted-foreground text-sm text-center mt-16">No weekly data yet</p>}
           </div>
         </div>
 

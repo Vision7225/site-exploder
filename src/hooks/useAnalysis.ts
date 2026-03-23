@@ -31,11 +31,15 @@ export function useAnalysis(type: AnalysisType) {
 
       setResult(data.result);
 
-      // Save to DB (best effort, anonymous allowed)
+      // Save to DB — attach user_id if authenticated
+      const { data: { session } } = await supabase.auth.getSession();
+      const userId = session?.user?.id ?? null;
+
       await supabase.from("analysis_results").insert({
         analysis_type: type,
         input_summary: content.slice(0, 200),
         result: data.result,
+        user_id: userId,
       } as any);
 
       return data.result;

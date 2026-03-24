@@ -36,8 +36,6 @@ export default function HomePage() {
   return (
     <AppLayout>
       <div className="space-y-6 max-w-5xl">
-        <MoodSelector selected={mood} onSelect={setMood} />
-
         {/* Hero */}
         <section className="rounded-2xl p-8 md:p-10 text-primary-foreground relative overflow-hidden reveal reveal-delay-1" style={{ background: "var(--gradient-hero)" }}>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,hsla(0,0%,100%,0.08),transparent_60%)]" />
@@ -46,6 +44,8 @@ export default function HomePage() {
             <p className="mt-3 opacity-85 text-base max-w-lg leading-relaxed">{currentMood.message}</p>
           </div>
         </section>
+
+        <MoodSelector selected={mood} onSelect={setMood} />
 
         {/* AI Recommendation */}
         <div className="glass-card p-5 flex items-center gap-4 reveal reveal-delay-2">

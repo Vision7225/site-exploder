@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/useAuth";
 const topLinks = [
   { to: "/", label: "Home" },
   { to: "/dashboard", label: "Dashboard" },
+  { to: "/about", label: "About" },
 ];
 
 interface AppHeaderProps {

@@ -144,6 +144,8 @@ export default function DashboardPage() {
       <div className="space-y-6 max-w-5xl">
         <MoodSelector selected={mood} onSelect={setMood} />
 
+        {/* Stress Alert */}
+        <StressAlert stressPercent={latestStress} />
         <section className="rounded-2xl p-8 text-primary-foreground relative overflow-hidden reveal reveal-delay-1" style={{ background: "var(--gradient-hero)" }}>
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_30%,hsla(0,0%,100%,0.08),transparent_60%)]" />
           <div className="relative">

@@ -16,6 +16,7 @@ const ROUTE_VARIANTS: Record<string, AnimVariant> = {
   "/sleep": "stars",
   "/login": "ripples",
   "/register": "ripples",
+  "/about": "neurons",
 };
 
 export default function AppLayout({ children }: { children: ReactNode }) {

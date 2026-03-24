@@ -41,6 +41,7 @@ const App = () => (
             <Route path="/audio" element={<ProtectedRoute><AudioAnalysis /></ProtectedRoute>} />
             <Route path="/video" element={<ProtectedRoute><VideoAnalysis /></ProtectedRoute>} />
             <Route path="/text" element={<ProtectedRoute><TextAnalysis /></ProtectedRoute>} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <ChatWidget />

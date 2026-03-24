@@ -24,6 +24,7 @@ const navSections = [
     title: "Overview",
     links: [
       { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/about", icon: Info, label: "About Project" },
     ],
   },
 ];

@@ -3,6 +3,7 @@ import AppLayout from "@/components/AppLayout";
 import MoodSelector from "@/components/MoodSelector";
 import MentalStatePrediction from "@/components/MentalStatePrediction";
 import RecommendationEngine from "@/components/RecommendationEngine";
+import StressAlert from "@/components/StressAlert";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/hooks/useAuth";
 import { classifyMentalState, type MentalStateResult } from "@/lib/mentalStateClassifier";

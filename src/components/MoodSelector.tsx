@@ -13,7 +13,7 @@ interface MoodSelectorProps {
 
 export default function MoodSelector({ selected, onSelect }: MoodSelectorProps) {
   return (
-    <div className="glass-card-static flex items-center gap-2 p-3 reveal">
+    <div className="glass-card-static flex items-center gap-2 p-3 mt-2 reveal">
       <span className="font-semibold text-xs text-muted-foreground uppercase tracking-wide ml-2 mr-1 hidden sm:inline">Mood</span>
       {moods.map((mood) => (
         <button

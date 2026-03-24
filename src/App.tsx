@@ -16,6 +16,7 @@ import TextAnalysis from "./pages/TextAnalysis";
 import AudioAnalysis from "./pages/AudioAnalysis";
 import VideoAnalysis from "./pages/VideoAnalysis";
 import EEGScan from "./pages/EEGScan";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import ChatWidget from "./components/ChatWidget";
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/audio" element={<ProtectedRoute><AudioAnalysis /></ProtectedRoute>} />
             <Route path="/video" element={<ProtectedRoute><VideoAnalysis /></ProtectedRoute>} />
             <Route path="/text" element={<ProtectedRoute><TextAnalysis /></ProtectedRoute>} />
+            <Route path="/about" element={<About />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <ChatWidget />

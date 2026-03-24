@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from "react-router-dom";
-import { Brain, LayoutDashboard, Image, Mic, Video, FileText, BookOpen, Bed, Activity, X } from "lucide-react";
+import { Brain, LayoutDashboard, Image, Mic, Video, FileText, BookOpen, Bed, Activity, Info, X } from "lucide-react";
 import { motion, useMotionValue, useTransform, PanInfo } from "framer-motion";
 
 const navSections = [
@@ -24,6 +24,7 @@ const navSections = [
     title: "Overview",
     links: [
       { to: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      { to: "/about", icon: Info, label: "About Project" },
     ],
   },
 ];

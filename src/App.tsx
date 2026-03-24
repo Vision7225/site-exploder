@@ -16,6 +16,7 @@ import TextAnalysis from "./pages/TextAnalysis";
 import AudioAnalysis from "./pages/AudioAnalysis";
 import VideoAnalysis from "./pages/VideoAnalysis";
 import EEGScan from "./pages/EEGScan";
+import About from "./pages/About";
 import NotFound from "./pages/NotFound";
 import ChatWidget from "./components/ChatWidget";
 

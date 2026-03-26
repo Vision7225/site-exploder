@@ -1,3 +1,3 @@
-# Welcome to your Lovable project
+# AI-EGG
 
-TODO: Document your project here
+AI-EGG Wellness web application.

@@ -1,5 +1,6 @@
+import { useEffect, useMemo, useRef, useState } from "react";
 import { motion } from "framer-motion";
-import { Lightbulb, TrendingUp, Activity, Zap, Heart, Brain } from "lucide-react";
+import { Lightbulb, TrendingUp, Activity, Zap, Heart, Brain, Play, Pause, Square, Volume2 } from "lucide-react";
 
 interface Props {
   result: Record<string, any>;
@@ -9,6 +10,101 @@ interface Props {
 export default function AnalysisResultCard({ result, type }: Props) {
   const moodScore = result.mood_score || result.overall_mood || 0;
   const stressLevel = result.stress_level || "N/A";
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const [playerVisible, setPlayerVisible] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [volume, setVolume] = useState(0.7);
+
+  const stressRaw = result.stress_level ?? result.stress ?? result.stress_score ?? null;
+  const emotionRaw = (result.primary_emotion || result.emotion || "").toString().toLowerCase();
+  const analysisText = (result.analysis || "").toString().toLowerCase();
+
+  const isHighStress = (() => {
+    if (typeof stressRaw === "number") return stressRaw >= 70;
+    if (typeof stressRaw === "string") {
+      const normalized = stressRaw.toLowerCase();
+      return normalized.includes("high") || normalized.includes("severe");
+    }
+    return false;
+  })();
+
+  const isHighEmotion = ["stress", "stressed", "anxious", "anxiety", "angry", "anger", "panic", "fear"].some((token) =>
+    emotionRaw.includes(token)
+  );
+  const hasHighSignalInAnalysis =
+    analysisText.includes("high stress") ||
+    analysisText.includes("severe stress") ||
+    analysisText.includes("very stressed") ||
+    analysisText.includes("high anxiety");
+
+  const shouldShowReliefMusic =
+    ["image", "video", "text", "audio"].includes(type) && (isHighStress || isHighEmotion || hasHighSignalInAnalysis);
+
+  const selectedTrack = useMemo(() => {
+    if (emotionRaw.includes("sad")) {
+      return {
+        label: "Soft Piano",
+        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+      };
+    }
+    if (emotionRaw.includes("angry") || emotionRaw.includes("anger")) {
+      return {
+        label: "Nature Sounds",
+        url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+      };
+    }
+    return {
+      label: "Meditation Ambience",
+      url: "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    };
+  }, [emotionRaw]);
+
+  useEffect(() => {
+    if (!audioRef.current) return;
+    audioRef.current.volume = volume;
+  }, [volume]);
+
+  useEffect(() => {
+    return () => {
+      if (!audioRef.current) return;
+      audioRef.current.pause();
+      audioRef.current.currentTime = 0;
+    };
+  }, []);
+
+  const handlePlayRelaxingMusic = async () => {
+    setPlayerVisible(true);
+    setIsPlaying(true);
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = 0;
+    try {
+      await audioRef.current.play();
+    } catch {
+      setIsPlaying(false);
+    }
+  };
+
+  const handleTogglePlayPause = async () => {
+    if (!audioRef.current) return;
+    if (isPlaying) {
+      audioRef.current.pause();
+      setIsPlaying(false);
+      return;
+    }
+    try {
+      await audioRef.current.play();
+      setIsPlaying(true);
+    } catch {
+      setIsPlaying(false);
+    }
+  };
+
+  const handleStop = () => {
+    if (!audioRef.current) return;
+    audioRef.current.pause();
+    audioRef.current.currentTime = 0;
+    setIsPlaying(false);
+  };
 
   const statCards = [
     moodScore > 0 && { icon: TrendingUp, label: "Mood Score", value: `${moodScore}/10`, accent: "text-primary" },
@@ -86,6 +182,53 @@ export default function AnalysisResultCard({ result, type }: Props) {
               </li>
             ))}
           </ul>
+        </div>
+      )}
+
+      {shouldShowReliefMusic && (
+        <div className="section-card space-y-3">
+          <h3 className="font-semibold text-foreground">Stress Relief Music</h3>
+
+          {!playerVisible && (
+            <button onClick={handlePlayRelaxingMusic} className="gradient-btn px-5 py-2.5 inline-flex items-center gap-2">
+              <Play className="w-4 h-4" />
+              Play Relaxing Music
+            </button>
+          )}
+
+          {playerVisible && (
+            <div className="rounded-xl border border-border/50 bg-muted/20 p-3 space-y-3">
+              <p className="text-xs text-muted-foreground">Now loaded: {selectedTrack.label}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <button onClick={handleTogglePlayPause} className="px-3 py-2 rounded-lg bg-primary/10 text-primary text-sm font-medium inline-flex items-center gap-1.5">
+                  {isPlaying ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
+                  {isPlaying ? "Pause" : "Play"}
+                </button>
+                <button onClick={handleStop} className="px-3 py-2 rounded-lg bg-destructive/10 text-destructive text-sm font-medium inline-flex items-center gap-1.5">
+                  <Square className="w-4 h-4" />
+                  Stop
+                </button>
+                <label className="inline-flex items-center gap-2 ml-1">
+                  <Volume2 className="w-4 h-4 text-muted-foreground" />
+                  <input
+                    type="range"
+                    min="0"
+                    max="1"
+                    step="0.05"
+                    value={volume}
+                    onChange={(e) => setVolume(Number(e.target.value))}
+                    className="w-28"
+                  />
+                </label>
+              </div>
+              <audio
+                ref={audioRef}
+                src={selectedTrack.url}
+                onEnded={() => setIsPlaying(false)}
+                preload="auto"
+              />
+            </div>
+          )}
         </div>
       )}
     </motion.div>

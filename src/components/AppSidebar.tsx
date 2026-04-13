@@ -84,7 +84,7 @@ export default function AppSidebar({ mobileOpen = false, onClose }: AppSidebarPr
   return (
     <>
       {/* Desktop sidebar */}
-      <aside className="w-[256px] bg-card/60 backdrop-blur-xl border-r border-border/50 h-[calc(100vh-64px)] fixed top-16 left-0 overflow-y-auto py-4 hidden md:flex flex-col gap-1 z-30">
+      <aside className="w-[256px] bg-card/60 backdrop-blur-xl border-r border-border/50 h-[calc(100vh-var(--app-header-height))] fixed top-[var(--app-header-height)] left-0 overflow-y-auto py-4 hidden md:flex flex-col gap-1 z-30">
         {navContent}
       </aside>
 
